@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -19,6 +20,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+
+import java.awt.*;
 
 public class Main extends Application {
 
@@ -42,6 +45,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         client_window = primaryStage;
         client_window.setTitle("DigiText");
+        client_window.getIcons().add(new Image(getClass().getResourceAsStream("sphs_icon.png")));
 
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
 
