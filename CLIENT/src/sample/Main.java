@@ -6,6 +6,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -28,7 +29,7 @@ public class Main extends Application {
     Stage client_window;
 
     //scenes & layouts
-    Scene welcome_screen, menu_screen, textbook_distribution_screen;
+    Scene welcome_screen, menu_screen, textbook_distribution_screen, textbook_return_screen, barcode_screen;
     BorderPane welcome_layout = new BorderPane(), menu_layout = new BorderPane();
     VBox welcome_center = new VBox(), menu_center = new VBox();
 
@@ -66,6 +67,9 @@ public class Main extends Application {
         welcome_center.setSpacing(10);
         welcome_layout.setCenter(welcome_center);
         welcome_screen = new Scene(welcome_layout, resolution_x, resolution_y);
+        welcome_screen.addEventHandler(KeyEvent.KEY_PRESSED, (key) -> {
+            client_window.setScene(menu_screen);
+        });
 
         /* Menu Screen */
         /*Menu Buttons*/
@@ -84,6 +88,7 @@ public class Main extends Application {
 
         Button game_button = new Button("Bored?");
         game_button.setFont(Font.font(display_font, 5));
+        game_button.setOnAction(e->AlertBox.display("ERROR","This feature is not complete yet!"));
 
 
         menu_center.getChildren().addAll(textbook_dis_button, textbook_ret_button, barcode_button, help_button, game_button);

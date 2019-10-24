@@ -1,5 +1,7 @@
 package sample;
 
+import javafx.fxml.FXMLLoader;
+import javafx.scene.image.Image;
 import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.layout.*;
@@ -8,11 +10,13 @@ import javafx.geometry.*;
 
 public class AlertBox {
     public static void display(String title, String message){
+
         Stage window = new Stage();
 
         window.initModality(Modality.APPLICATION_MODAL);
         window.setTitle(title);
         window.setMinWidth(250);
+        window.getIcons().add(new Image("/error_icon.png"));
 
         Label label = new Label();
         label.setText(message);
