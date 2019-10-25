@@ -9,7 +9,7 @@ import javafx.scene.control.*;
 import javafx.geometry.*;
 
 public class AlertBox {
-    public static void display(String title, String message){
+    public static void display(String title, String message, String button_message){
 
         Stage window = new Stage();
 
@@ -20,7 +20,7 @@ public class AlertBox {
 
         Label label = new Label();
         label.setText(message);
-        Button closeButton = new Button("Close the window");
+        Button closeButton = new Button(button_message);
         closeButton.setOnAction(e -> window.close());
 
         VBox layout = new VBox(10);

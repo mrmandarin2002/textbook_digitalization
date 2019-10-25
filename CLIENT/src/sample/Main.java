@@ -30,18 +30,20 @@ public class Main extends Application {
 
     //scenes & layouts
     Scene welcome_screen, menu_screen, textbook_distribution_screen, textbook_return_screen, barcode_screen;
-    BorderPane welcome_layout = new BorderPane(), menu_layout = new BorderPane();
+    BorderPane welcome_layout = new BorderPane(), menu_layout = new BorderPane(), textbook_dis_layout = new BorderPane();
     VBox welcome_center = new VBox(), menu_center = new VBox();
 
     //Display values
     String display_font = "Times New Roman";
     int resolution_y = 500;
     int resolution_x = 650;
+    boolean scanner_connected = true;
 
     public static void main(String[] args){
         launch(args);
     }
 
+    //basically where the program starts
     @Override
     public void start(Stage primaryStage) throws Exception{
         client_window = primaryStage;
@@ -59,7 +61,7 @@ public class Main extends Application {
 
         //Welcome Button
         Button welcome_button = new Button("Press to continue");
-        welcome_button.setOnAction(e-> client_window.setScene(menu_screen));
+        welcome_button.setOnAction(e-> menu());
 
         //Welcome Layout
         welcome_center.getChildren().addAll(welcome_label, welcome_button);
@@ -67,15 +69,23 @@ public class Main extends Application {
         welcome_center.setSpacing(10);
         welcome_layout.setCenter(welcome_center);
         welcome_screen = new Scene(welcome_layout, resolution_x, resolution_y);
-        welcome_screen.addEventHandler(KeyEvent.KEY_PRESSED, (key) -> {
-            client_window.setScene(menu_screen);
-        });
+        welcome_screen.addEventHandler(KeyEvent.KEY_PRESSED, (key) -> menu());
 
-        /* Menu Screen */
+        //sets start screen as the welcome_screen
+        client_window.setScene(welcome_screen);
+        client_window.show();
+
+    }
+
+    //Menu Screen
+    private void menu(){
+
         /*Menu Buttons*/
         Button textbook_dis_button = new Button("Textbook Distribution");
         textbook_dis_button.setFont(Font.font(display_font, 15));
-        textbook_dis_button.setOnAction(e-> client_window.setScene(textbook_distribution_screen));
+        textbook_dis_button.setOnAction(e-> {
+            if(check_scanner()) textbook_distribution();
+        });
 
         Button textbook_ret_button = new Button("Textbook Return");
         textbook_ret_button.setFont(Font.font(display_font, 15));
@@ -83,12 +93,12 @@ public class Main extends Application {
         Button barcode_button = new Button("Barcode Maker / Textbook Scanner");
         barcode_button.setFont(Font.font(display_font, 15));
 
-        Button help_button = new Button("hElP?!?");
+        Button help_button = new Button("Help");
         help_button.setFont(Font.font(display_font, 15));
 
         Button game_button = new Button("Bored?");
         game_button.setFont(Font.font(display_font, 5));
-        game_button.setOnAction(e->AlertBox.display("ERROR","This feature is not complete yet!"));
+        game_button.setOnAction(e->AlertBox.display("ERROR","This feature is not complete yet!", "Close window"));
 
 
         menu_center.getChildren().addAll(textbook_dis_button, textbook_ret_button, barcode_button, help_button, game_button);
@@ -97,11 +107,22 @@ public class Main extends Application {
 
         menu_layout.setCenter(menu_center);
         menu_screen = new Scene(menu_layout, resolution_x, resolution_y);
-
-
-        client_window.setScene(welcome_screen);
-        client_window.show();
+        client_window.setScene(menu_screen);
 
     }
+    //checks if scanner is connected
+    private boolean check_scanner(){
+        if(scanner_connected){
+            return true;
+        } else{
+            AlertBox.display("No Scanner Found", "Please connect a scanner and try again", "Got it Senpai!");
+        }
+        return false;
+    }
 
+    private void textbook_distribution(){
+        //buttons
+        Button go_back = new Button("Back to menu");
+
+    }
 }
