@@ -16,7 +16,7 @@ public class AlertBox {
         window.initModality(Modality.APPLICATION_MODAL);
         window.setTitle(title);
         window.setMinWidth(250);
-        window.getIcons().add(new Image("/error_icon.png"));
+        window.getIcons().add(new Image("/icons/error_icon.png"));
 
         Label label = new Label();
         label.setText(message);
@@ -31,4 +31,5 @@ public class AlertBox {
         window.setScene(scene);
         window.showAndWait();
     }
+
 }

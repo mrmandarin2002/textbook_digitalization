@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -26,18 +27,22 @@ import java.awt.*;
 
 public class Main extends Application {
 
-    Stage client_window;
+    public Stage client_window;
 
     //scenes & layouts
-    Scene welcome_screen, menu_screen, textbook_distribution_screen, textbook_return_screen, barcode_screen;
-    BorderPane welcome_layout = new BorderPane(), menu_layout = new BorderPane(), textbook_dis_layout = new BorderPane();
-    VBox welcome_center = new VBox(), menu_center = new VBox();
+    private Scene welcome_screen, menu_screen, textbook_screen,  barcode_screen;
+    private BorderPane welcome_layout = new BorderPane(), menu_layout = new BorderPane(), textbook_layout = new BorderPane();
+    private VBox welcome_center = new VBox(), menu_center = new VBox(), textbook_center = new VBox(), textbook_left = new VBox();
+    private HBox textbook_bottom = new HBox();
 
     //Display values
-    String display_font = "Times New Roman";
-    int resolution_y = 500;
-    int resolution_x = 650;
-    boolean scanner_connected = true;
+    private String display_font = "Times New Roman";
+    private int resolution_y = 500;
+    private int resolution_x = 650;
+    Status_boolean scanner_connected = new Status_boolean();
+
+    //check if screens have been made
+    boolean textbook_made = false, barcode_made = false, help_made = false;
 
     public static void main(String[] args){
         launch(args);
@@ -48,7 +53,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         client_window = primaryStage;
         client_window.setTitle("DigiText");
-        client_window.getIcons().add(new Image(getClass().getResourceAsStream("sphs_icon.png")));
+        client_window.getIcons().add(new Image("/icons/sphs_icon.png"));
 
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
 
@@ -75,20 +80,27 @@ public class Main extends Application {
         client_window.setScene(welcome_screen);
         client_window.show();
 
+        //scanner status
+
+
     }
 
     //Menu Screen
     private void menu(){
 
         /*Menu Buttons*/
-        Button textbook_dis_button = new Button("Textbook Distribution");
-        textbook_dis_button.setFont(Font.font(display_font, 15));
-        textbook_dis_button.setOnAction(e-> {
-            if(check_scanner()) textbook_distribution();
+        Button textbook_button = new Button("Textbook Management");
+        textbook_button.setFont(Font.font(display_font, 15));
+        textbook_button.setOnAction(e-> {
+            if(check_scanner()){
+                if(textbook_made){
+                    client_window.setScene(textbook_screen);
+                } else {
+                    textbook_management();
+                    textbook_made = true;
+                }
+            };
         });
-
-        Button textbook_ret_button = new Button("Textbook Return");
-        textbook_ret_button.setFont(Font.font(display_font, 15));
 
         Button barcode_button = new Button("Barcode Maker / Textbook Scanner");
         barcode_button.setFont(Font.font(display_font, 15));
@@ -101,7 +113,7 @@ public class Main extends Application {
         game_button.setOnAction(e->AlertBox.display("ERROR","This feature is not complete yet!", "Close window"));
 
 
-        menu_center.getChildren().addAll(textbook_dis_button, textbook_ret_button, barcode_button, help_button, game_button);
+        menu_center.getChildren().addAll(textbook_button, barcode_button, help_button, game_button);
         menu_center.setAlignment(Pos.CENTER);
         menu_center.setSpacing(10);
 
@@ -110,9 +122,10 @@ public class Main extends Application {
         client_window.setScene(menu_screen);
 
     }
+
     //checks if scanner is connected
     private boolean check_scanner(){
-        if(scanner_connected){
+        if(scanner_connected.getBool()){
             return true;
         } else{
             AlertBox.display("No Scanner Found", "Please connect a scanner and try again", "Got it Senpai!");
@@ -120,9 +133,23 @@ public class Main extends Application {
         return false;
     }
 
-    private void textbook_distribution(){
-        //buttons
-        Button go_back = new Button("Back to menu");
+    private void textbook_management(){
 
+        //booleans
+        Button go_back = new Button("Back to menu");
+        go_back.setOnAction(e-> {
+            client_window.setScene(menu_screen);
+        });
+        textbook_bottom.getChildren().add(go_back);
+        textbook_layout.setBottom(textbook_bottom);
+
+        Label student_status = new Label("Please scan in a student's barcode");
+        textbook_center.getChildren().add(student_status);
+        textbook_center.setAlignment(Pos.CENTER);
+        textbook_layout.setCenter(textbook_center);
+
+
+        textbook_screen = new Scene(textbook_layout, resolution_x,resolution_y);
+        client_window.setScene(textbook_screen);
     }
 }
