@@ -15,6 +15,12 @@ public class Status_boolean {
     }
 
     public void setBool(boolean BoolName){
+        //System.out.println(this.getClass().getSimpleName() + " is set to " + BoolName);
         this.Bool.set(BoolName);
+    }
+
+    public void flipBool(){
+        this.Bool.set(!Bool.get());
+        System.out.println(this.getClass().getSimpleName() + " is now set to " + Bool.get());
     }
 }
