@@ -31,13 +31,13 @@ public class Main extends Application {
     private Scene welcome_screen, menu_screen, textbook_screen,  barcode_screen;
     private BorderPane welcome_layout = new BorderPane(), menu_layout = new BorderPane();
     private VBox welcome_center = new VBox(), menu_center = new VBox();
-
     //Display values
     private String display_font = "Times New Roman";
     private int resolution_y = 500;
     private int resolution_x = 650;
     Status_boolean scanner = new Status_boolean();
     Status_boolean server = new Status_boolean();
+    BarcodeReader reader = new BarcodeReader();
 
     //check if screens have been made
     boolean textbook_made = false, barcode_made = false, help_made = false;
@@ -79,6 +79,7 @@ public class Main extends Application {
         //keyboard testing stuff
         client_window.addEventHandler(KeyEvent.KEY_PRESSED, (key) -> {
             System.out.println("TEST: " + key);
+            System.out.println(key);
             switch(key.getText()){
                 //simulates barcode connection
                 case "w":
