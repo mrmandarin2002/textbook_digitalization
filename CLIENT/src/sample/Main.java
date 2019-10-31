@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -38,6 +39,9 @@ public class Main extends Application {
     Status_boolean scanner = new Status_boolean();
     Status_boolean server = new Status_boolean();
     BarcodeReader reader = new BarcodeReader();
+    private String barcode_string = "";
+    KTimer timer = new KTimer();
+    private long previous_input_time = 0;
 
     //check if screens have been made
     boolean textbook_made = false, barcode_made = false, help_made = false;
@@ -77,8 +81,16 @@ public class Main extends Application {
         });
 
         //keyboard testing stuff
+
         client_window.addEventHandler(KeyEvent.KEY_PRESSED, (key) -> {
-            System.out.println("TEST: " + key);
+            boolean scanned_check = true;
+            //System.out.println("TEST: " + key);
+            if((timer.getTime() - previous_input_time) > 0.2){
+                barcode_string = "";
+                scanned_check = false;n
+            }
+            previous_input_time = timer.getTime();
+            barcode_string += key.getText();
             System.out.println(key);
             switch(key.getText()){
                 //simulates barcode connection
@@ -95,6 +107,10 @@ public class Main extends Application {
                 case "a":
                     server.setBool(false);
                     break;
+            }
+            if(barcode_string.length() >= 7 && scanned_check){
+                System.out.println(barcode_string);
+                barcode_string = "";
             }
         });
 
@@ -161,12 +177,12 @@ public class Main extends Application {
         GridPane textbook_left = new GridPane();
         HBox textbook_bottom = new HBox();
         BorderPane textbook_layout = new BorderPane();
-
         //bottom
         Button go_back = new Button("Back to menu");
         go_back.setOnAction(e-> {
             client_window.setScene(menu_screen);
         });
+        //reader.addBarcodeListener(BarcodeListener)
         textbook_bottom.getChildren().add(go_back);
         textbook_layout.setBottom(textbook_bottom);
 
