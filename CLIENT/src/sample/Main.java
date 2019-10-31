@@ -3,6 +3,7 @@ package sample;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
@@ -38,6 +39,7 @@ public class Main extends Application {
     private int resolution_x = 650;
     Status_boolean scanner = new Status_boolean();
     Status_boolean server = new Status_boolean();
+    Status_boolean barcode_scanned = new Status_boolean();
     BarcodeReader reader = new BarcodeReader();
     private String barcode_string = "";
     KTimer timer = new KTimer();
@@ -45,6 +47,7 @@ public class Main extends Application {
 
     //check if screens have been made
     boolean textbook_made = false, barcode_made = false, help_made = false;
+    boolean scanned_check = true;
 
     public static void main(String[] args){
         launch(args);
@@ -53,12 +56,14 @@ public class Main extends Application {
     //basically where the program starts
     @Override
     public void start(Stage primaryStage) throws Exception{
+
         //loading a bunch of stuff
         client_window = primaryStage;
         client_window.setTitle("DigiText");
         client_window.getIcons().add(new Image("/icons/sphs_icon.png"));
 
-        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
+        Node root = FXMLLoader.load(getClass().getResource("sample.fxml"));
+        //getBarcodeEventHandler(root);
 
         /* Welcome Screen */
         //Welcome Label
@@ -67,8 +72,10 @@ public class Main extends Application {
         welcome_label.setTextFill(Color.color(0.69,0.19,0.38));
 
         //Welcome Button
-        Button welcome_button = new Button("Press to continue");
-        welcome_button.setOnAction(e-> menu());
+        Button welcome_button = new Button("Press to continue");welcome_button.setOnAction(e-> {
+            menu();
+        });
+        welcome_button.setFocusTraversable(false);
 
         //Welcome Layout
         welcome_center.getChildren().addAll(welcome_label, welcome_button);
@@ -76,22 +83,25 @@ public class Main extends Application {
         welcome_center.setSpacing(10);
         welcome_layout.setCenter(welcome_center);
         welcome_screen = new Scene(welcome_layout, resolution_x, resolution_y);
-        welcome_screen.addEventHandler(KeyEvent.KEY_PRESSED, (key) -> {
-            menu();
-        });
+
+        timer.startTimer(0);
 
         //keyboard testing stuff
 
         client_window.addEventHandler(KeyEvent.KEY_PRESSED, (key) -> {
             boolean scanned_check = true;
             //System.out.println("TEST: " + key);
-            if((timer.getTime() - previous_input_time) > 0.2){
+            //timer.updateTime();
+            System.out.println(timer.getTime() - previous_input_time);
+            if((timer.getTime() - previous_input_time) >= 30){
+                //System.out.println(timer.getTime());
+                barcode_scanned.setBool(false);
                 barcode_string = "";
-                scanned_check = false;n
+                scanned_check = false;
             }
             previous_input_time = timer.getTime();
             barcode_string += key.getText();
-            System.out.println(key);
+            //System.out.println(key);
             switch(key.getText()){
                 //simulates barcode connection
                 case "w":
@@ -108,11 +118,14 @@ public class Main extends Application {
                     server.setBool(false);
                     break;
             }
-            if(barcode_string.length() >= 7 && scanned_check){
-                System.out.println(barcode_string);
-                barcode_string = "";
+            if(barcode_string.length() >= 5 && scanned_check && key.getCode() == KeyCode.ENTER) {
+                barcode_scanned.setBool(true);
+                //AlertBox.display("Barcode", barcode_string, "Cool eh?");
+                //barcode_string = "";
+                scanned_check = false;
             }
         });
+
 
         //sets start screen as the welcome_screen
         client_window.setScene(welcome_screen);
@@ -139,16 +152,20 @@ public class Main extends Application {
                 }
             };
         });
+        textbook_button.setFocusTraversable(false);
 
         Button barcode_button = new Button("Barcode Maker / Textbook Scanner");
         barcode_button.setFont(Font.font(display_font, 15));
+        barcode_button.setFocusTraversable(false);
 
         Button help_button = new Button("Help");
         help_button.setFont(Font.font(display_font, 15));
+        help_button.setFocusTraversable(false);
 
         Button game_button = new Button("Bored?");
         game_button.setFont(Font.font(display_font, 5));
         game_button.setOnAction(e->AlertBox.display("ERROR","This feature is not complete yet!", "Close window"));
+        game_button.setFocusTraversable(false);
 
 
         menu_center.getChildren().addAll(textbook_button, barcode_button, help_button, game_button);
@@ -179,6 +196,7 @@ public class Main extends Application {
         BorderPane textbook_layout = new BorderPane();
         //bottom
         Button go_back = new Button("Back to menu");
+        go_back.setFocusTraversable(false);
         go_back.setOnAction(e-> {
             client_window.setScene(menu_screen);
         });
@@ -188,6 +206,7 @@ public class Main extends Application {
 
         //center
         Label student_status = new Label("Please scan in a student's barcode");
+        String work_pls = "Please scan in a student's barcode";
         textbook_center.getChildren().add(student_status);
         textbook_center.setAlignment(Pos.CENTER);
         textbook_layout.setCenter(textbook_center);
@@ -209,7 +228,28 @@ public class Main extends Application {
         server.BoolProperty().addListener((v,oldValue,newValue) -> {
            server_status_icon.setImage(server.getImage());
         });
+        barcode_scanned.BoolProperty().addListener((v, oldValue, newValue) -> {
+           if(barcode_scanned.getBool()){
+               student_status.setText(barcode_string);
+           }
+        });
         textbook_screen = new Scene(textbook_layout, resolution_x,resolution_y);
         client_window.setScene(textbook_screen);
+    }
+
+    private void getBarcodeEventHandler(Node root){
+        root.addEventHandler(KeyEvent.KEY_PRESSED, ev -> {
+            System.out.println("IN");
+            if(ev.getCode() == KeyCode.ENTER){
+
+               if(barcode_string.length() >= 5 && scanned_check){
+                   barcode_scanned.setBool(true);
+                   System.out.println(barcode_string);
+                   barcode_string = "";
+                   scanned_check = false;
+                   System.out.println(barcode_string);
+               }
+            }
+        });
     }
 }
