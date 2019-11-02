@@ -2,7 +2,9 @@ package sample;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.*;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -26,6 +28,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.*;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main extends Application {
 
@@ -68,6 +73,7 @@ public class Main extends Application {
         client_window = primaryStage;
         client_window.setTitle("DigiText");
         client_window.getIcons().add(new Image("/icons/sphs_icon.png"));
+        barcode_scanned.setBool(false);
 
         Node root = FXMLLoader.load(getClass().getResource("sample.fxml")); //no clue wtf this does
 
@@ -224,28 +230,106 @@ public class Main extends Application {
     }
 
     private void setScanner_screen(){
+
+        int[] num_of_textbooks_scanned = {0};
+        Boolean[] values_set = {false};
         BorderPane scanner_layout = new BorderPane();
-        VBox scanner_bottom = new VBox(), scanner_left = new VBox();
-        HBox scanner_center = new HBox();
+        VBox scanner_bottom = new VBox(), scanner_left = new VBox(), scanner_center = new VBox();
+        GridPane scanner_top = new GridPane();
 
         //adds back button
         scanner_bottom.getChildren().add(back_button("Back to menu"));
 
         TextField title_field = new TextField("Title");
+        TextField price_field = new TextField("Price");
+
         Label title_label = new Label("Title of textbook: ");
+        title_label.setFont(Font.font(display_font, FontWeight.BOLD, 15));
         Label condition_label = new Label("Condition of textbook: ");
+        condition_label.setFont(Font.font(display_font, FontWeight.BOLD, 15));
+        Label price_label = new Label("Price of textbook:");
+        price_label.setFont(Font.font(display_font, FontWeight.BOLD, 15));
+
+        Label textbook_num_label = new Label("Number of current textbook scanned: " + num_of_textbooks_scanned[0]);
+        Label barcode_label = new Label("Current barcode ID: " + barcode_string);
+        scanner_center.getChildren().addAll(textbook_num_label, barcode_label);
+        scanner_center.setAlignment(Pos.CENTER);
+        scanner_layout.setCenter(scanner_center);
+
+        Button set_button = new Button("Set textbook values");
+        set_button.setFocusTraversable(false);
+        set_button.setOnAction(e->{
+            values_set[0] = !values_set[0];
+            System.out.println(price_field.getText());
+            if(values_set[0]){
+                if(price_check(price_field.getText())) {
+                    title_field.setDisable(true);
+                    price_field.setDisable(true);
+                    set_button.setText("Reset");
+                }
+                else{
+                    values_set[0] = !values_set[0];
+                    AlertBox.display("Idiot.", "Please stop trying to break my program and enter a number in the textfield", "I'll stop being stupid from now on!");
+                }
+
+            }
+            else{
+                title_field.setDisable(false);
+                price_field.setDisable(false);
+                set_button.setText("Set textbook values");
+                num_of_textbooks_scanned[0] = 0;
+                textbook_num_label.setText("Number of current textbook scanned: " + num_of_textbooks_scanned[0]);
+                barcode_string = "";
+                barcode_label.setText("Current barcode ID: " + barcode_string);
+            }
+        });
+
+
+        ChoiceBox<String> condition_choice = new ChoiceBox<>();
+        condition_choice.getItems().addAll("New", "Good", "Used", "Bad");
+        condition_choice.setValue("New");
+        scanner_left.getChildren().addAll(title_label, title_field, condition_label, condition_choice, price_label, price_field, set_button);
+        scanner_left.setSpacing(6);
+        scanner_left.setPadding(new Insets(10,0,0,10));
+        scanner_left.setAlignment(Pos.CENTER);
+
+        ImageView server_status_icon = server.getImageView();
+        Label server_status_text = new Label("Server Connected Status: ");
+        scanner_top.add(server_status_text, 0, 0);
+        scanner_top.add(server_status_icon, 1, 0);
+        scanner_layout.setTop(scanner_top);
+        server.BoolProperty().addListener((v,oldValue,newValue) -> {
+            server_status_icon.setImage(server.getImage());
+        });
+
+        barcode_scanned.BoolProperty().addListener((v, oldValue, newValue) -> {
+            if(barcode_scanned.getBool()){
+                //if(num_of_textbooks_scanned[0] == 0) num_of_textbooks_scanned[0]--;
+                num_of_textbooks_scanned[0]++;
+                textbook_num_label.setText("Number of current textbook scanned: " + num_of_textbooks_scanned[0]);
+                barcode_label.setText("Current barcode ID: " + barcode_string);
+                String textbook_title = title_field.getText();
+                double textbook_price = Double.parseDouble(price_field.getText());
+                String textbook_condition = condition_choice.getValue();
+                
+            }
+        });
 
         scanner_layout.setLeft(scanner_left);
         scanner_layout.setBottom(scanner_bottom);
 
-        ChoiceBox<String> condition_choice = new ChoiceBox<>();
-        condition_choice.getItems().addAll("New", "Good", "Used", "Bad");
-        scanner_left.getChildren().addAll(title_label, title_field, condition_label, condition_choice);
-        scanner_left.setSpacing(10);
-
         scanner_screen = new Scene(scanner_layout, resolution_x, resolution_y);
         client_window.setScene(scanner_screen);
 
+    }
+
+    private boolean price_check(String dubs){
+        try{
+            double price_dec = Double.parseDouble(dubs);
+            return true;
+        } catch(Exception e){
+            return false;
+        }
     }
 
     private Button back_button(String button_string){
@@ -255,5 +339,20 @@ public class Main extends Application {
             client_window.setScene(menu_screen);
         });
         return go_back;
+    }
+
+    private int condition_return(String cond){
+        switch(cond){
+            case "New":
+                return 0;
+            case "Good":
+                return 1;
+            case "Used":
+                return 2;
+            case "Bad":
+                return 3;
+            default:
+                return -1;
+        }
     }
 }
