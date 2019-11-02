@@ -159,12 +159,13 @@ public class Main extends Application {
         textbook_scanner_button.setFont(Font.font(display_font, 15));
         textbook_scanner_button.setFocusTraversable(false);
         textbook_scanner_button.setOnAction(e-> {
-            if(textbook_scanner_made){
+            /*if(textbook_scanner_made){
                 client_window.setScene(scanner_screen);
             } else{
                 setScanner_screen();
                 textbook_scanner_made = true;
-            }
+            }*/
+            setScanner_screen();
         });
 
 
@@ -213,7 +214,7 @@ public class Main extends Application {
 
         //top (status stuff)
         ImageView server_status_icon = server.getImageView();
-        Label server_status_text = new Label("Server Connected Status: ");
+        Label server_status_text = new Label("Server Connection Status: ");
         textbook_left.add(server_status_text, 0, 0);
         textbook_left.add(server_status_icon, 1, 0);
         textbook_layout.setTop(textbook_left);
@@ -294,7 +295,7 @@ public class Main extends Application {
         scanner_left.setAlignment(Pos.CENTER);
 
         ImageView server_status_icon = server.getImageView();
-        Label server_status_text = new Label("Server Connected Status: ");
+        Label server_status_text = new Label("Server Connection Status: ");
         scanner_top.add(server_status_text, 0, 0);
         scanner_top.add(server_status_icon, 1, 0);
         scanner_layout.setTop(scanner_top);
@@ -311,7 +312,7 @@ public class Main extends Application {
                 String textbook_title = title_field.getText();
                 double textbook_price = Double.parseDouble(price_field.getText());
                 String textbook_condition = condition_choice.getValue();
-                
+
             }
         });
 
