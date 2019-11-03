@@ -26,6 +26,7 @@ public class AlertBox {
         VBox layout = new VBox(10);
         layout.getChildren().addAll(label, closeButton);
         layout.setAlignment(Pos.CENTER);
+        layout.setPadding(new Insets (12,12,12,12));
 
         Scene scene = new Scene(layout);
         window.setScene(scene);

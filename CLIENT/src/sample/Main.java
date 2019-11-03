@@ -159,12 +159,6 @@ public class Main extends Application {
         textbook_scanner_button.setFont(Font.font(display_font, 15));
         textbook_scanner_button.setFocusTraversable(false);
         textbook_scanner_button.setOnAction(e-> {
-            /*if(textbook_scanner_made){
-                client_window.setScene(scanner_screen);
-            } else{
-                setScanner_screen();
-                textbook_scanner_made = true;
-            }*/
             setScanner_screen();
         });
 
@@ -172,6 +166,10 @@ public class Main extends Application {
         Button barcode_maker_button = new Button("Barcode Maker");
         barcode_maker_button.setFont(Font.font(display_font, 15));
         barcode_maker_button.setFocusTraversable(false);
+        barcode_maker_button.setOnAction(e->{
+           setBarcode_screen();
+           AlertBox.display("Error", "Sorry this screen is not available", "Gotcha Senpai");
+        });
 
         Button help_button = new Button("Help");
         help_button.setFont(Font.font(display_font, 15));
@@ -190,6 +188,10 @@ public class Main extends Application {
         menu_layout.setCenter(menu_center);
         menu_screen = new Scene(menu_layout, resolution_x, resolution_y);
         client_window.setScene(menu_screen);
+
+    }
+
+    private void setBarcode_screen(){
 
     }
 
