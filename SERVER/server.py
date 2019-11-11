@@ -40,4 +40,4 @@ while True:
             clients.append(address)
         # process the command request
         decoded_data = data.decode("utf-8")
-        udp_socket.sendto(interact[decoded_data.split(";")[0]](decoded_data.split(";")[1].split(",")), address)
+        udp_socket.sendto(interact[decoded_data.split(";")[0]](decoded_data.split(";")[1].split(",")).encode("utf-8"), address)

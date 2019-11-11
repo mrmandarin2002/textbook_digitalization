@@ -1,3 +1,6 @@
+# import neccessary classes and functions
+from datetime import datetime
+
 # function to get the current time
 def get_time():
     return str(datetime.now()).split()[1].split(".")[0]+" "
@@ -17,7 +20,13 @@ def condition_textbook(args):
     print(get_time()+"Getting the condition of textbook with id "+args[0])
     return "1"
 
+# ping (always return 1)
+def ping(args):
+    print(get_time()+"Received ping...")
+    return "1"
+
 # function dictionary
 interact = {"valid_t": valid_textbook,
             "valid_s": valid_student,
-            "condition_t": condition_textbook}
+            "condition_t": condition_textbook,
+            "p": ping}
