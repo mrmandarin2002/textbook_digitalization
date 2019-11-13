@@ -48,7 +48,7 @@ class Interaction {
             String received = new String(packet.getData(), 0, packet.getLength());
             return received;
         } catch (Exception e) { // if the socket timeout exception was thrown, simply return 0
-            return "0";
+            return "_";
         }
     }
 
@@ -81,6 +81,38 @@ class Interaction {
         } else {
             return false;
         }
+    }
+
+    // textbook id validation method
+    public Boolean valid_t(String textbook_id) {
+        // create arguments array
+        String[] a = {textbook_id};
+        // check if ther response from the server is "1"
+        if (client_command("valid_t", a) == "1") {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // student id validation method
+    public Boolean valid_s(String student_id) {
+        // create arguments array
+        String[] a = {student_id};
+        // check if the response from the server is "1"
+        if (client_command("valid_s", a) == "1") {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // fetch textbook condition method
+    public int condition_t(String textbook_id) {
+        // create argumnts array
+        String[] a = {textbook_id};
+        // return the response from the server
+        return (int)client_command("condition_t", a);
     }
 
     // method to close the udp socket
