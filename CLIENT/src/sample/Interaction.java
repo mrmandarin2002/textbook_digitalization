@@ -84,7 +84,7 @@ class Interaction {
     }
 
     // textbook id validation method
-    public Boolean valid_t(String textbook_id) {
+    public Boolean valid_t(String textbook_id) throws IOException {
         // create arguments array
         String[] a = {textbook_id};
         // check if ther response from the server is "1"
@@ -96,7 +96,7 @@ class Interaction {
     }
 
     // student id validation method
-    public Boolean valid_s(String student_id) {
+    public Boolean valid_s(String student_id) throws IOException {
         // create arguments array
         String[] a = {student_id};
         // check if the response from the server is "1"
@@ -108,11 +108,11 @@ class Interaction {
     }
 
     // fetch textbook condition method
-    public int condition_t(String textbook_id) {
+    public int condition_t(String textbook_id) throws IOException {
         // create argumnts array
         String[] a = {textbook_id};
         // return the response from the server
-        return (int)client_command("condition_t", a);
+        return Integer.parseInt(client_command("condition_t", a));
     }
 
     // method to close the udp socket
