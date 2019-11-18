@@ -115,6 +115,24 @@ class Interaction {
         return Integer.parseInt(client_command("condition_t", a));
     }
 
+    // get student information from database
+    public String info_s(String student_id) throws IOException {
+        String[] a = {student_id};
+        return client_command("info_s", a);
+    }
+
+    // delete a textbook from the database
+    public String delete_t(String textbook_id) throws IOException {
+        String[] a = {textbook_id};
+        return client_command("delete_s", a);
+    }
+
+    // add a textbook to the database
+    public String add_t(String textbook_id, String textbook_name, String textbook_condition, String textbook_price) throws IOException {
+        String[] a = {textbook_id, textbook_name, textbook_condition, textbook_price};
+        return client_command("add_t", a);
+    }
+
     // method to close the udp socket
     public void close() {
         socket.close();

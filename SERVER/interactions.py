@@ -25,8 +25,23 @@ def ping(args):
     print(get_time()+"Received ping...")
     return "1"
 
+# get student information
+def information_student(args):
+    return "1"
+
+# delete textbook from database
+def delete_textbook(args):
+    return "1"
+
+# add a textbook to the database
+def add_textbook(args):
+    return "1"
+
 # function dictionary
 interact = {"valid_t": valid_textbook,
             "valid_s": valid_student,
             "condition_t": condition_textbook,
+            "info_s": information_student,
+            "delete_t": delete_textbook,
+            "add_t": add_textbook,
             "p": ping}
