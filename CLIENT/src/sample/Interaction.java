@@ -8,7 +8,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 class Interaction {
-
     // define socket object, server address, and destination port
     private DatagramSocket socket;
     private InetAddress server_address;
@@ -18,7 +17,7 @@ class Interaction {
     private byte[] buf;
 
     // Interaction object initialization method
-    public Interaction(String server_a, int server_p) throws SocketException, UnknownHostException {
+    public Interaction(String server_a, int server_p) throws SocketException, UnknownHostException, IOException {
         // create new datagram socket (udp socket) object
         socket = new DatagramSocket();
         // assign server address to InetAddress object derived from server address
@@ -34,14 +33,14 @@ class Interaction {
     public String client_echo(String msg) throws IOException {
         // convert message argument into byte-array form
         buf = msg.getBytes();
-        
+
         // form and send message datagram
         DatagramPacket packet = new DatagramPacket(buf, buf.length, server_address, server_port);
         socket.send(packet);
 
         // form response datagram
         packet = new DatagramPacket(buf, buf.length);
-        
+
         try {
             // receive, process, and return response data
             socket.receive(packet);

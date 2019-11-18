@@ -28,6 +28,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.*;
 
 import java.awt.*;
+import java.io.IOException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +38,8 @@ import java.util.Map;
 public class Main extends Application {
 
     public Stage client_window;
+
+    Interaction server = new Interaction("127.0.0.1", 7356);
 
     //scenes & layouts
     private Scene welcome_screen, menu_screen, textbook_screen,  scanner_screen, barcode_screen;
@@ -46,7 +51,6 @@ public class Main extends Application {
     private int resolution_y = 500, resolution_x = 600;
 
     //booleans that have properties (so they can be put into listeners)
-    Status_boolean server = new Status_boolean();
     Status_boolean barcode_scanned = new Status_boolean();
 
     //string of the barcode that will be scanned (constantly being updated)
@@ -60,13 +64,17 @@ public class Main extends Application {
     //check if screens have been made
     boolean textbook_made = false, barcode_made = false, help_made = false, textbook_scanner_made = false;
 
-    public static void main(String[] args){
+    public Main() throws SocketException, UnknownHostException, IOException {
+
+    }
+
+    public static void main(String[] args) throws IOException{
         launch(args);
     }
 
     //basically where the program starts
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception, IOException {
 
         //start loads a bunch of stuff
         //loading a bunch of stuff
@@ -88,22 +96,11 @@ public class Main extends Application {
             }
             previous_input_time = timer.getTime();
             barcode_string += key.getText();
-            //System.out.println(key);
-            switch(key.getText()){
-                //simulates server connection
-                case "q":
-                    server.setBool(true);
-                    break;
-                case "a":
-                    server.setBool(false);
-                    break;
-            }
             //this is to get barcode input
             if(barcode_string.length() >= 5 && key.getCode() == KeyCode.ENTER) {
                 barcode_scanned.setBool(true);
             }
         });
-
         //scanner status
         setWelcome_screen();
 
@@ -213,16 +210,6 @@ public class Main extends Application {
         textbook_center.setAlignment(Pos.CENTER);
         textbook_layout.setCenter(textbook_center);
 
-
-        //top (status stuff)
-        ImageView server_status_icon = server.getImageView();
-        Label server_status_text = new Label("Server Connection Status: ");
-        textbook_left.add(server_status_text, 0, 0);
-        textbook_left.add(server_status_icon, 1, 0);
-        textbook_layout.setTop(textbook_left);
-        server.BoolProperty().addListener((v,oldValue,newValue) -> {
-           server_status_icon.setImage(server.getImage());
-        });
         barcode_scanned.BoolProperty().addListener((v, oldValue, newValue) -> {
            if(barcode_scanned.getBool()){
                student_status.setText(barcode_string);
@@ -296,25 +283,23 @@ public class Main extends Application {
         scanner_left.setPadding(new Insets(10,0,0,10));
         scanner_left.setAlignment(Pos.CENTER);
 
-        ImageView server_status_icon = server.getImageView();
-        Label server_status_text = new Label("Server Connection Status: ");
-        scanner_top.add(server_status_text, 0, 0);
-        scanner_top.add(server_status_icon, 1, 0);
-        scanner_layout.setTop(scanner_top);
-        server.BoolProperty().addListener((v,oldValue,newValue) -> {
-            server_status_icon.setImage(server.getImage());
-        });
-
         barcode_scanned.BoolProperty().addListener((v, oldValue, newValue) -> {
             if(barcode_scanned.getBool()){
-                //if(num_of_textbooks_scanned[0] == 0) num_of_textbooks_scanned[0]--;
-                num_of_textbooks_scanned[0]++;
-                textbook_num_label.setText("Number of current textbook scanned: " + num_of_textbooks_scanned[0]);
-                barcode_label.setText("Current barcode ID: " + barcode_string);
-                String textbook_title = title_field.getText();
-                double textbook_price = Double.parseDouble(price_field.getText());
-                String textbook_condition = condition_choice.getValue();
-
+                try {
+                    if(server.ping()) {
+                        //if(num_of_textbooks_scanned[0] == 0) num_of_textbooks_scanned[0]--;
+                        num_of_textbooks_scanned[0]++;
+                        textbook_num_label.setText("Number of current textbook scanned: " + num_of_textbooks_scanned[0]);
+                        barcode_label.setText("Current barcode ID: " + barcode_string);
+                        String textbook_title = title_field.getText();
+                        double textbook_price = Double.parseDouble(price_field.getText());
+                        String textbook_condition = condition_choice.getValue();
+                    } else{
+                        AlertBox.display("Error", "You are not connected to the server idiot", "Maybe turn on your wifi?");
+                    }
+                } catch (IOException e) {
+                    AlertBox.display("Error", "You are not connected to the server idiot", "Maybe turn on your wifi?");
+                }
             }
         });
 
