@@ -68,13 +68,13 @@ public class Main extends Application {
 
     }
 
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws java.io.IOException {
         launch(args);
     }
 
     //basically where the program starts
     @Override
-    public void start(Stage primaryStage) throws Exception, IOException {
+    public void start(Stage primaryStage) throws java.io.IOException  {
 
         //start loads a bunch of stuff
         //loading a bunch of stuff
@@ -107,7 +107,7 @@ public class Main extends Application {
     }
 
     //welcome screen
-    private void setWelcome_screen(){
+    private void setWelcome_screen() throws java.io.IOException  {
 
         BorderPane welcome_layout = new BorderPane();
         VBox welcome_center = new VBox();
@@ -135,7 +135,7 @@ public class Main extends Application {
     }
 
     //Menu Screen
-    private void setMenu(){
+    private void setMenu()  {
         BorderPane menu_layout = new BorderPane();
         VBox menu_center = new VBox();
 
@@ -192,12 +192,15 @@ public class Main extends Application {
 
     }
 
-    private void textbook_management(){
+    private void textbook_management() {
 
         VBox textbook_center = new VBox();
         GridPane textbook_left = new GridPane();
         HBox textbook_bottom = new HBox();
         BorderPane textbook_layout = new BorderPane();
+
+        Boolean student_info_in[] = {false};
+        String student_info[] = {""};
 
         //adds back button
         textbook_bottom.getChildren().add(back_button("Back to menu"));
@@ -210,16 +213,37 @@ public class Main extends Application {
         textbook_center.setAlignment(Pos.CENTER);
         textbook_layout.setCenter(textbook_center);
 
+        // ***************** WORK IN PROGRESS ************************
         barcode_scanned.BoolProperty().addListener((v, oldValue, newValue) -> {
            if(barcode_scanned.getBool()){
-               student_status.setText(barcode_string);
+               try {
+                   if(server.valid_s(barcode_string)){
+                        student_status.setText("");
+                        student_info_in[0] = true;
+
+                   } else if (server.valid_t(barcode_string)){
+                        if(student_info_in[0]){
+                            student_info[0] = server.info_s(barcode_string);
+                        } else{
+                            AlertBox.display("Error", "You need to scan in a student's barcode first before you can start scanning in textbook!", "Of course senpai");
+                        }
+                   } else{
+                       if(student_info_in[0]){
+                            AlertBox.display("Error", "This student / textbook's barcode was not recognized", "Got it senpai!");
+                       } else{
+                            AlertBox.display("Error", "This student's barcode was not recognized", "Got it senpai!");
+                       }
+                   }
+               } catch (IOException e) {
+                   e.printStackTrace();
+               }
            }
         });
         textbook_screen = new Scene(textbook_layout, resolution_x,resolution_y);
         client_window.setScene(textbook_screen);
     }
 
-    private void setScanner_screen(){
+    private void setScanner_screen() {
 
         int[] num_of_textbooks_scanned = {0};
         Boolean[] values_set = {false};
@@ -287,13 +311,27 @@ public class Main extends Application {
             if(barcode_scanned.getBool()){
                 try {
                     if(server.ping()) {
-                        //if(num_of_textbooks_scanned[0] == 0) num_of_textbooks_scanned[0]--;
-                        num_of_textbooks_scanned[0]++;
-                        textbook_num_label.setText("Number of current textbook scanned: " + num_of_textbooks_scanned[0]);
-                        barcode_label.setText("Current barcode ID: " + barcode_string);
-                        String textbook_title = title_field.getText();
-                        double textbook_price = Double.parseDouble(price_field.getText());
-                        String textbook_condition = condition_choice.getValue();
+                        if(server.valid_s(barcode_string)){
+                            AlertBox.display("Error", "This is a student's barcode dumbo!", "YIKES!");
+                        }
+                        else{
+                            boolean addTextbook = true;
+                            if(server.valid_t(barcode_string)) {
+                                addTextbook = OptionBox.display("Replace?", "This textbook was found in the database, would you like to replace it?");
+                                if(addTextbook){
+                                    server.delete_t(barcode_string);
+                                }
+                            }
+                            if(addTextbook) {
+                                num_of_textbooks_scanned[0]++;
+                                String textbook_title = title_field.getText();
+                                double textbook_price = Double.parseDouble(price_field.getText());
+                                String textbook_condition = condition_choice.getValue();
+                                server.add_t(barcode_string, textbook_title, textbook_condition, Double.toString(textbook_price));
+                                textbook_num_label.setText("Number of current textbook scanned: " + num_of_textbooks_scanned[0]);
+                                barcode_label.setText("Current barcode ID: " + barcode_string);
+                            }
+                        }
                     } else{
                         AlertBox.display("Error", "You are not connected to the server idiot", "Maybe turn on your wifi?");
                     }
