@@ -15,18 +15,19 @@ def valid_student(args):
     print(get_time()+"checking if "+args[0]+" is a valid student id...")
     return "1"
 
-# get the condition of a textbook
-def condition_textbook(args):
-    print(get_time()+"Getting the condition of textbook with id "+args[0])
-    return "1"
-
 # ping (always return 1)
 def ping(args):
     print(get_time()+"Received ping...")
     return "1"
 
+# get textbook information
+def information_textbook(args):
+    print(get_time()+"Received request for information of textbook: "+args[0])
+    return "1"
+
 # get student information
 def information_student(args):
+    print(get_time()+"Received request for information of student: "+args[0])
     return "1"
 
 # delete textbook from database
@@ -40,7 +41,7 @@ def add_textbook(args):
 # function dictionary
 interact = {"valid_t": valid_textbook,
             "valid_s": valid_student,
-            "condition_t": condition_textbook,
+            "info_t": information_textbook,
             "info_s": information_student,
             "delete_t": delete_textbook,
             "add_t": add_textbook,
