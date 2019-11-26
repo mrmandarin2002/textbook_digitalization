@@ -59,7 +59,7 @@ class Interaction {
             String msg = cmd+";"+args[0];
             // add remaining elements of the arguments array
             for (int i = 1; i < args.length; i++) {
-                msg += ","+args[i]; // concatenate ith element of the arguments array
+                msg += "|"+args[i]; // concatenate ith element of the arguments array
             }
             // return the response of the fully formed message string
             return client_echo(msg);
