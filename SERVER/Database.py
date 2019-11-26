@@ -47,14 +47,14 @@ def get_students(conn):
     cur.close()
     return result
 
-def insert_textbook(conn, title, cost, condition):
+def insert_textbook(conn, number, title, cost, condition):
     # create an sql command string
-    sql_cmd = """INSERT INTO Textbooks(Title, Cost, Condition)
+    sql_cmd = """INSERT INTO Textbooks(TextbookNumber, TextbookTitle, TextbookCost, TextbookCondition)
                  VALUES (?,?,?)"""
     # create a cursor object
     cur = conn.cursor()
     # execute the sql command string using the function parameters
-    cur.execute(sql_cmd, (title, cost, condition))
+    cur.execute(sql_cmd, (number, title, cost, condition))
     # commit the changes to the database
     conn.commit()
     # return the id of the inserted student

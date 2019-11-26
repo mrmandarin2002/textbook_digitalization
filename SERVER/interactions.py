@@ -68,7 +68,7 @@ def delete_textbook(args): # textbook number
 def add_textbook(args): # textbook number, title, cost, condition
     print(get_time()+"Adding textbook to database\n\tNumber: "+args[0]+"\n\tTitle: "+args[1]+"\n\tCost: "+args[2]+"\n\tCondition: "+args[3])
     conn = Database.create_connection("server.db")
-    Database.insert_textbook(conn, args[0], args[1], args[2])
+    Database.insert_textbook(conn, args[0], args[1], args[2], args[3])
     conn.close()
     return "1"
 
