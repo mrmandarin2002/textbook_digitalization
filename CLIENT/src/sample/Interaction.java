@@ -87,7 +87,7 @@ class Interaction {
         // create arguments array
         String[] a = {textbook_id};
         // check if ther response from the server is "1"
-        if (client_command("valid_t", a) == "1") {
+        if (client_command("valid_t", a).equals("1")) {
             return true;
         } else {
             return false;
@@ -99,7 +99,7 @@ class Interaction {
         // create arguments array
         String[] a = {student_id};
         // check if the response from the server is "1"
-        if (client_command("valid_s", a) == "1") {
+        if (client_command("valid_s", a).equals("1")) {
             return true;
         } else {
             return false;
@@ -127,8 +127,8 @@ class Interaction {
     }
 
     // add a textbook to the database
-    public String add_t(String textbook_id, String textbook_name, String textbook_condition, String textbook_price) throws IOException {
-        String[] a = {textbook_id, textbook_name, textbook_condition, textbook_price};
+    public String add_t(String textbook_id, String textbook_name, String textbook_price, String textbook_condition) throws IOException {
+        String[] a = {textbook_id, textbook_name, textbook_price, textbook_condition};
         return client_command("add_t", a);
     }
 

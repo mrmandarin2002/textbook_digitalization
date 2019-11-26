@@ -14,7 +14,7 @@ def close_connection(conn):
 
 def insert_student(conn, number, name, deposit):
     # create an sql command string
-    sql_cmd = """INSERT INTO Students(StudentNumber, StudentName, Deposit)
+    sql_cmd = """INSERT INTO Students(StudentNumber, StudentName, StudentDeposit)
              VALUES(?,?,?)"""
     # create a cursor object
     cur = conn.cursor()
@@ -28,7 +28,7 @@ def insert_student(conn, number, name, deposit):
 
 def remove_student(conn, StudentId):
     # create an sql command string using the function parameter
-    sql_cmd = "DELETE FROM Students WHERE StudentId="+str(StudentId)+";"
+    sql_cmd = "DELETE FROM Students WHERE StudentNumber="+str(StudentId)+";"
     # create a cursor object
     cur = conn.cursor()
     # execute the sql command string
@@ -64,7 +64,7 @@ def insert_textbook(conn, title, cost, condition):
 
 def remove_textbook(conn, TextbookId):
     # create an sql command string using the function parameter
-    sql_cmd = "DELETE FROM Textbooks WHERE TextbookId="+str(TextbookId)+";"
+    sql_cmd = "DELETE FROM Textbooks WHERE TextbookNumber="+str(TextbookId)+";"
     # create a cursor object
     cur = conn.cursor()
     # execute the sql command string
@@ -82,3 +82,7 @@ def get_textbooks(conn):
     result = cur.fetchall()
     cur.close()
     return result
+
+conn = create_connection("server.db")
+print(get_students(conn))
+conn.close()

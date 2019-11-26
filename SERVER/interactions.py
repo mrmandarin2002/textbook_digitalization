@@ -1,41 +1,80 @@
 # import neccessary classes and functions
 from datetime import datetime
+import Database
 
 # function to get the current time
 def get_time():
     return str(datetime.now()).split()[1].split(".")[0]+" "
 
-# check if a textbook id is valid in the database
-def valid_textbook(args):
+# checks if a student is valid in the database
+def valid_student(args): # student number
+    print(get_time()+"Checking if "+args[0]+" is a valid student id...")
+    conn = Database.create_connection("server.db")
+    students = Database.get_students(conn)
+    for student in students:
+        if student[1] == int(args[0]):
+            conn.close()
+            return "1"
+    conn.close()
+    return "0"
+
+# gets student information from the database
+def information_student(args): # student number
+    print(get_time()+"Returning information of textbook "+args[0]+"...")
+    conn = Database.create_connection("server.db")
+    students = Database.get_students(conn)
+    for student in students:
+        if student[1] == int(args[0]):
+            student_strings = []
+            for i in student:
+                student_strings.append(str(i))
+            conn.close()
+            return "|".join(student_strings)
+
+# checks if a textbook is valid in the database
+def valid_textbook(args): # textbook number
     print(get_time()+"Checking if "+args[0]+" is a valid textbook id...")
-    return "1"
+    conn = Database.create_connection("server.db")
+    textbooks = Database.get_textbooks(conn)
+    for textbook in textbooks:
+        if textbook[1] == int(args[0]):
+            conn.close()
+            return "1"
+    conn.close()
+    return "0"
 
-# check if a student id is valid in the database
-def valid_student(args):
-    print(get_time()+"checking if "+args[0]+" is a valid student id...")
-    return "1"
-
-# ping (always return 1)
-def ping(args):
-    print(get_time()+"Received ping...")
-    return "1"
-
-# get textbook information
-def information_textbook(args):
-    print(get_time()+"Received request for information of textbook: "+args[0])
-    return "1"
-
-# get student information
-def information_student(args):
-    print(get_time()+"Received request for information of student: "+args[0])
-    return "1"
+# gets textbook information from the database
+def information_textbook(args): # textbook number
+    print(get_time()+"Returning information of textbook "+args[0]+"...")
+    conn = Database.create_connection("server.db")
+    textbooks = Database.get_textbooks(conn)
+    for textbook in textbooks:
+        if textbook[1] == int(args[0]):
+            textbook_strings = []
+            for i in textbook:
+                textbook_strings.append(str(i))
+            conn.close()
+            return "|".join(textbook_strings)
 
 # delete textbook from database
-def delete_textbook(args):
+def delete_textbook(args): # textbook number
+    print(get_time()+"Deleting "+args[0]+" from textbook table...")
+    conn = Database.create_connection("server.db")
+    Database.remove_textbook(conn, args[0])
+    conn.close()
     return "1"
 
 # add a textbook to the database
-def add_textbook(args):
+def add_textbook(args): # textbook number, title, cost, condition
+    print(get_time()+"Adding textbook to database\n\tNumber: "+args[0]+"\n\tTitle: "+args[1]+"\n\tCost: "+args[2]+"\n\tCondition: "+args[3])
+    conn = Database.create_connection("server.db")
+    Database.insert_textbook(conn, args[0], args[1], args[2])
+    conn.close()
+    return "1"
+
+# ping (always return 1)
+def ping(args): # no arguments
+    print(get_time()+"Received ping...")
     return "1"
 
 # function dictionary
