@@ -2,23 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cdb932d9-7e58-4d94-93a9-e7b232ef17da" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/src/sample/OptionBox.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/AlertBox.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/AlertBox.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/BarcodeReader$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/BarcodeReader$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/BarcodeReader$BarcodeListener.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/BarcodeReader$BarcodeListener.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/BarcodeReader.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/BarcodeReader.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/Controller.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/Controller.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/Dynamic_image.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/Dynamic_image.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/Interaction.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/Interaction.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/KTimer$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/KTimer$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/KTimer.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/KTimer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/Status_boolean.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/Status_boolean.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sample/BarcodeReader.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sample/Dynamic_image.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sample/Interaction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/sample/Interaction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/BarcodeReader$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/BarcodeReader$BarcodeListener.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/BarcodeReader.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/Dynamic_image.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Textbook Distribution/sample/Main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sample/Controller.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/sample/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/sample/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sample/ScanHandler.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sample/sample.fxml" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -238,19 +230,5 @@
   <component name="VcsManagerConfiguration">
     <option name="OFFER_MOVE_TO_ANOTHER_CHANGELIST_ON_PARTIAL_COMMIT" value="true" />
     <option name="INCLUDE_TEXT_INTO_SHELF" value="false" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-method">
-          <url>file://$PROJECT_DIR$/src/sample/Main.java</url>
-          <line>245</line>
-          <properties class="sample.Main" method="setScanner_screen">
-            <option name="EMULATED" value="true" />
-          </properties>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
