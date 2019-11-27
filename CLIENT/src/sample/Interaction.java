@@ -123,7 +123,7 @@ class Interaction {
     // delete a textbook from the database
     public String delete_t(String textbook_id) throws IOException {
         String[] a = {textbook_id};
-        return client_command("delete_s", a);
+        return client_command("delete_t", a);
     }
 
     // add a textbook to the database

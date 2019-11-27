@@ -46,6 +46,8 @@ public class Main extends Application {
     //timer to see if keyboard input was actually barcode input
     private KTimer timer = new KTimer();
 
+
+
     public Main() throws IOException {
     }
 
@@ -135,15 +137,6 @@ public class Main extends Application {
             setScanner_screen();
         });
 
-
-        Button barcode_maker_button = new Button("Barcode Maker");
-        barcode_maker_button.setFont(Font.font(display_font, 15));
-        barcode_maker_button.setFocusTraversable(false);
-        barcode_maker_button.setOnAction(e->{
-           setBarcode_screen();
-           AlertBox.display("Error", "Sorry this screen is not available", "Gotcha Senpai");
-        });
-
         Button help_button = new Button("Help");
         help_button.setFont(Font.font(display_font, 15));
         help_button.setFocusTraversable(false);
@@ -154,17 +147,13 @@ public class Main extends Application {
         game_button.setFocusTraversable(false);
 
 
-        menu_center.getChildren().addAll(textbook_button, textbook_scanner_button, barcode_maker_button, help_button, game_button);
+        menu_center.getChildren().addAll(textbook_button, textbook_scanner_button, help_button, game_button);
         menu_center.setAlignment(Pos.CENTER);
         menu_center.setSpacing(10);
 
         menu_layout.setCenter(menu_center);
         menu_screen = new Scene(menu_layout, resolution_x, resolution_y);
         client_window.setScene(menu_screen);
-
-    }
-
-    private void setBarcode_screen(){
 
     }
 
@@ -283,8 +272,9 @@ public class Main extends Application {
         scanner_left.setPadding(new Insets(10,0,0,10));
         scanner_left.setAlignment(Pos.CENTER);
 
+        //if a barcode gets scanned in
         barcode_scanned.BoolProperty().addListener((v, oldValue, newValue) -> {
-            if(barcode_scanned.getBool()){
+            if(barcode_scanned.getBool() && values_set[0]){
                 try {
                     if(server.ping()) {
                         if(server.valid_s(barcode_string)){
@@ -292,19 +282,19 @@ public class Main extends Application {
                         }
                         else{
                             boolean addTextbook = true;
-                            if(server.valid_t(barcode_string)) {
+                            String textbook_info = "";
+                            if(server.valid_t(barcode_string)){
+
                                 addTextbook = OptionBox.display("Replace?", "This textbook was found in the database, would you like to replace it?");
                                 if(addTextbook){
                                     server.delete_t(barcode_string);
                                 }
                             }
                             if(addTextbook) {
-                                System.out.println("FUCK YES BITCH");
                                 num_of_textbooks_scanned[0]++;
                                 String textbook_title = title_field.getText();
                                 double textbook_price = Double.parseDouble(price_field.getText());
                                 String textbook_condition = condition_choice.getValue();
-                                server.add_t(barcode_string, textbook_title, textbook_condition, Double.toString(textbook_price));
                                 textbook_num_label.setText("Number of current textbook scanned: " + num_of_textbooks_scanned[0]);
                                 barcode_label.setText("Current barcode ID: " + barcode_string);
                                 server.add_t(barcode_string, textbook_title, Double.toString(textbook_price), Integer.toString(condition_return(textbook_condition)));
@@ -316,6 +306,8 @@ public class Main extends Application {
                 } catch (IOException e) {
                     AlertBox.display("Error", "You are not connected to the server idiot", "Maybe turn on your wifi?");
                 }
+            } else if(!values_set[0]){
+                AlertBox.display("Error", "Please care to click the set values button before scanning in stuff, dumbo", "Of course");
             }
         });
 
