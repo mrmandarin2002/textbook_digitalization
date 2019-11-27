@@ -13,10 +13,6 @@ def get_local_address():
     s.close()
     return return_var
 
-# function to get the current time
-def get_time():
-    return str(datetime.now()).split()[1].split(".")[0]+" "
-
 # initialize udp socket object and bind the socket to the localhost at port 7356
 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = ('', 7356)
@@ -40,4 +36,4 @@ while True:
             clients.append(address)
         # process the command request
         decoded_data = data.decode("utf-8")
-        udp_socket.sendto(interact[decoded_data.split(";")[0]](decoded_data.split(";")[1].split(",")).encode("utf-8"), address)
+        udp_socket.sendto(interact[decoded_data.split(";")[0]](decoded_data.split(";")[1].split("|")).encode("utf-8"), address)
