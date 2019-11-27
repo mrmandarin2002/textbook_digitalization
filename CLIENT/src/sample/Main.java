@@ -74,7 +74,9 @@ public class Main extends Application {
                 barcode_string = "";
             }
             previous_input_time = timer.getTime();
-            barcode_string += key.getText();
+            if(key.getCode() != KeyCode.ENTER) {
+                barcode_string += key.getText();
+            }
             //this is to get barcode input
             if(barcode_string.length() >= 5 && key.getCode() == KeyCode.ENTER) {
                 barcode_scanned.setBool(true);
@@ -297,6 +299,7 @@ public class Main extends Application {
                                 }
                             }
                             if(addTextbook) {
+                                System.out.println("FUCK YES BITCH");
                                 num_of_textbooks_scanned[0]++;
                                 String textbook_title = title_field.getText();
                                 double textbook_price = Double.parseDouble(price_field.getText());
@@ -304,6 +307,7 @@ public class Main extends Application {
                                 server.add_t(barcode_string, textbook_title, textbook_condition, Double.toString(textbook_price));
                                 textbook_num_label.setText("Number of current textbook scanned: " + num_of_textbooks_scanned[0]);
                                 barcode_label.setText("Current barcode ID: " + barcode_string);
+                                server.add_t(barcode_string, textbook_title, Double.toString(textbook_price), Integer.toString(condition_return(textbook_condition)));
                             }
                         }
                     } else{
