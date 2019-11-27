@@ -47,6 +47,12 @@ def get_students(conn):
     cur.close()
     return result
 
+def get_studentNumber(conn, studentId):
+    students = get_students(conn)
+    for student in students:
+        if student[0] == studentId:
+            return str(student[1])
+
 def insert_textbook(conn, number, title, cost, condition):
     # create an sql command string
     sql_cmd = """INSERT INTO Textbooks(TextbookNumber, TextbookTitle, TextbookCost, TextbookCondition)
@@ -83,6 +89,6 @@ def get_textbooks(conn):
     cur.close()
     return result
 
-conn = create_connection("server.db")
-print(get_students(conn))
-conn.close()
+# conn = create_connection("server.db")
+# print(get_students(conn))
+# conn.close()
