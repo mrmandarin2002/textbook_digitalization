@@ -54,7 +54,8 @@ def information_textbook(args): # textbook number
             for i in textbook:
                 textbook_strings.append(str(i))
             conn.close()
-            return "|".join(textbook_strings)
+            textbook_strings[-1] = Database.get_studentNumber(conn, textbook_strings[-1])
+            return "|".join(textbook_strings[1:])
 
 # delete textbook from database
 def delete_textbook(args): # textbook number
