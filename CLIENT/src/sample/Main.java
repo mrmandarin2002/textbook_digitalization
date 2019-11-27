@@ -230,7 +230,7 @@ public class Main extends Application {
         price_label.setFont(Font.font(display_font, FontWeight.BOLD, 15));
 
         Label textbook_num_label = new Label("Number of current textbook scanned: " + num_of_textbooks_scanned[0]);
-        Label barcode_label = new Label("Current barcode ID: " + barcode_string);
+        Label barcode_label = new Label("Current barcode ID: ");
         scanner_center.getChildren().addAll(textbook_num_label, barcode_label);
         scanner_center.setAlignment(Pos.CENTER);
         scanner_layout.setCenter(scanner_center);
@@ -284,7 +284,8 @@ public class Main extends Application {
                             boolean addTextbook = true;
                             String textbook_info = "";
                             if(server.valid_t(barcode_string)){
-
+                                textbook_info = server.info_t(barcode_string);
+                                System.out.println(textbook_info);
                                 addTextbook = OptionBox.display("Replace?", "This textbook was found in the database, would you like to replace it?");
                                 if(addTextbook){
                                     server.delete_t(barcode_string);
