@@ -63,10 +63,10 @@ def insert_textbook(conn, number, title, cost, condition):
     cur.execute(sql_cmd, (number, title, cost, condition))
     # commit the changes to the database
     conn.commit()
-    # return the id of the inserted student
-    StudentId = cur.lastrowid
+    # return the id of the inserted textbook
+    TextbookId = cur.lastrowid
     cur.close()
-    return StudentId
+    return TextbookId
 
 def remove_textbook(conn, TextbookId):
     # create an sql command string using the function parameter
