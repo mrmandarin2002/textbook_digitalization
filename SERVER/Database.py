@@ -50,7 +50,7 @@ def get_students(conn):
 def insert_textbook(conn, number, title, cost, condition):
     # create an sql command string
     sql_cmd = """INSERT INTO Textbooks(TextbookNumber, TextbookTitle, TextbookCost, TextbookCondition)
-                 VALUES (?,?,?)"""
+                 VALUES (?,?,?,?)"""
     # create a cursor object
     cur = conn.cursor()
     # execute the sql command string using the function parameters
