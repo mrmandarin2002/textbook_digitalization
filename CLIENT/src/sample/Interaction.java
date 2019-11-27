@@ -106,12 +106,10 @@ class Interaction {
         }
     }
 
-    // fetch textbook condition method
-    public int condition_t(String textbook_id) throws IOException {
-        // create arguments array
-        String[] a = {textbook_id};
-        // return the response from the server
-        return Integer.parseInt(client_command("condition_t", a));
+    // get textbook information from the database
+    public String info_t(String textbook_id) throws IOException {
+        String[] a= {textbook_id};
+        return client_command("info_t", a);
     }
 
     // get student information from database
