@@ -38,7 +38,15 @@ class Interaction {
         DatagramPacket packet = new DatagramPacket(buf, buf.length, server_address, server_port);
         socket.send(packet);
 
+        // create buffer string
+        int max_size = 250;
+        String buf_string = "";
+        for (int i=0; i<max_size; i++) {
+            buf_string = buf_string + "0";
+        }
+
         // form response datagram
+        buf = buf_string.getBytes();
         packet = new DatagramPacket(buf, buf.length);
 
         try {

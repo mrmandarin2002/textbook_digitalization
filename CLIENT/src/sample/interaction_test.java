@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 class interaction_test {
     public static void main(String[] args) throws SocketException, UnknownHostException, IOException {
         Interaction client = new Interaction("127.0.0.1", 7356);
-        System.out.println(client.valid_s("123456"));
+        System.out.println(client.info_t("12456"));
         client.close();
     }
 }
