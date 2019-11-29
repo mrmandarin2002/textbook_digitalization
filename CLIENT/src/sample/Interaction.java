@@ -39,6 +39,7 @@ class Interaction {
         socket.send(packet);
 
         // form response datagram
+        System.out.println(buf.length + " !!");
         packet = new DatagramPacket(buf, buf.length);
 
         try {

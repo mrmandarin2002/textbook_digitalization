@@ -66,6 +66,11 @@ public class Main extends Application {
         client_window.getIcons().add(new Image("/icons/sphs_icon.png"));
         barcode_scanned.setBool(false);
 
+        //what happens when the program is closed
+        client_window.setOnCloseRequest(e->{
+            server.close();
+        });
+
         //starts timer
         timer.startTimer(0);
 
@@ -86,6 +91,8 @@ public class Main extends Application {
         });
         //after initialization of everything, go to the welcome screen
         setWelcome_screen();
+
+
     }
 
     //welcome screen
