@@ -88,7 +88,3 @@ def get_textbooks(conn):
     result = cur.fetchall()
     cur.close()
     return result
-
-# conn = create_connection("server.db")
-# print(get_students(conn))
-# conn.close()
