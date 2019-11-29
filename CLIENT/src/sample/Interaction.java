@@ -46,7 +46,11 @@ class Interaction {
         }
 
         // form response datagram
+<<<<<<< HEAD
         buf = buf_string.getBytes();
+=======
+        System.out.println(buf.length + " !!");
+>>>>>>> 940cfbdce30bcb3dd687ed081f46c520c29772d2
         packet = new DatagramPacket(buf, buf.length);
 
         try {
