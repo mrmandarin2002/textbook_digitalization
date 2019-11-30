@@ -46,6 +46,8 @@ public class Main extends Application {
     //timer to see if keyboard input was actually barcode input
     private KTimer timer = new KTimer();
 
+    //textbook characteristics
+    private String[] textbook_info = new String[5];
 
 
     public Main() throws IOException {
@@ -144,6 +146,11 @@ public class Main extends Application {
             setScanner_screen();
         });
 
+        Button info_button = new Button("Info Scanner");
+        info_button.setFont(Font.font(display_font, 15));
+        info_button.setFocusTraversable(false);
+        info_button.setOnAction(e->info_scanner());
+
         Button help_button = new Button("Help");
         help_button.setFont(Font.font(display_font, 15));
         help_button.setFocusTraversable(false);
@@ -154,7 +161,7 @@ public class Main extends Application {
         game_button.setFocusTraversable(false);
 
 
-        menu_center.getChildren().addAll(textbook_button, textbook_scanner_button, help_button, game_button);
+        menu_center.getChildren().addAll(textbook_button, textbook_scanner_button, info_button,help_button, game_button);
         menu_center.setAlignment(Pos.CENTER);
         menu_center.setSpacing(10);
 
@@ -162,6 +169,35 @@ public class Main extends Application {
         menu_screen = new Scene(menu_layout, resolution_x, resolution_y);
         client_window.setScene(menu_screen);
 
+    }
+
+    private void info_scanner(){
+        BorderPane info_layout = new BorderPane();
+        HBox info_bottom = new HBox();
+
+        info_bottom.getChildren().add(back_button("Back to menu"));
+        info_layout.setBottom(info_bottom);
+
+        barcode_scanned.BoolProperty().addListener((v, oldValue, newValue) -> {
+            if(barcode_scanned.getBool() == true){
+                try {
+                    if(server.valid_s(barcode_string)){
+                        System.out.println("FEATURE NOT OUT YET BOI");
+                    } else if(server.valid_t(barcode_string)){
+                        t_sort(server.info_t(barcode_string));
+                        System.out.println(textbook_info);
+                    } else{
+                        AlertBox.display("Error", "WTF DID YOU SCAN IN BOI?", "I know, I'm stupid");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        back_button("back");
+
+        Scene info_screen = new Scene(info_layout, resolution_x, resolution_y);
+        client_window.setScene(info_screen);
     }
 
     private void textbook_management() {
@@ -289,10 +325,10 @@ public class Main extends Application {
                         }
                         else{
                             boolean addTextbook = true;
-                            String textbook_info = "";
+                            String textbook_info_string = "";
                             if(server.valid_t(barcode_string)){
-                                textbook_info = server.info_t(barcode_string);
-                                System.out.println(textbook_info);
+                                textbook_info_string = server.info_t(barcode_string);
+                                System.out.println(textbook_info_string);
                                 addTextbook = OptionBox.display("Replace?", "This textbook was found in the database, would you like to replace it?");
                                 if(addTextbook){
                                     server.delete_t(barcode_string);
@@ -357,6 +393,19 @@ public class Main extends Application {
                 return 3;
             default:
                 return -1;
+        }
+    }
+
+    private void t_sort(String t_string){
+        String temp = "";
+        int cnt = 0;
+        for(int x = 0; x < t_string.length(); x++){
+            if(t_string.charAt(x) == '|'){
+                textbook_info[cnt++] = temp;
+                temp = "";
+            } else{
+                temp += t_string.charAt(x);
+            }
         }
     }
 }
