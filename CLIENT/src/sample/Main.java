@@ -54,7 +54,7 @@ public class Main extends Application {
     //idx 4 = barcode of owner
     private String[][] textbook_info = new String[2][5];
 
-    boolean in_management = false, in_tscanner = false, in_scanner = false;
+    boolean in_management = false, in_tscanner = false, in_scanner = false, in_deleter = false;
 
     public Main() throws IOException {
     }
@@ -159,6 +159,13 @@ public class Main extends Application {
             setScanner_screen();
         });
 
+        Button textbook_deleter_button = new Button("Textbook Deleter");
+        textbook_deleter_button.setFont(Font.font(display_font, 15));
+        textbook_deleter_button.setFocusTraversable(false);
+        textbook_deleter_button.setOnAction(e->{
+           setDeleter_screen();
+        });
+
         Button info_button = new Button("Info Scanner");
         info_button.setFont(Font.font(display_font, 15));
         info_button.setFocusTraversable(false);
@@ -174,7 +181,7 @@ public class Main extends Application {
         game_button.setFocusTraversable(false);
 
 
-        menu_center.getChildren().addAll(textbook_button, textbook_scanner_button, info_button,help_button, game_button);
+        menu_center.getChildren().addAll(textbook_button, textbook_scanner_button, textbook_deleter_button, info_button,help_button, game_button);
         menu_center.setAlignment(Pos.CENTER);
         menu_center.setSpacing(10);
 
@@ -182,6 +189,53 @@ public class Main extends Application {
         menu_screen = new Scene(menu_layout, resolution_x, resolution_y);
         client_window.setScene(menu_screen);
 
+    }
+
+    private void setDeleter_screen(){
+        in_deleter = true;
+        BorderPane deleter_layout = new BorderPane();
+        VBox deleter_center = new VBox();
+        HBox deleter_bottom = new HBox();
+
+        Label barcode_status = new Label("Please scan in the barcode of the textbook you would like to delete");
+        Label deletion_status = new Label("");
+        deleter_center.getChildren().addAll(barcode_status, deletion_status);
+        deleter_center.setAlignment(Pos.CENTER);
+        deleter_layout.setCenter(deleter_center);
+
+        deleter_bottom.getChildren().add(back_button("Back to menu"));
+        deleter_layout.setBottom(deleter_bottom);
+
+        barcode_scanned.BoolProperty().addListener((v, oldValue, newValue) -> {
+            if(in_deleter){
+                try {
+                    if(server.ping()){
+                        if(server.valid_s(barcode_string)){
+                            System.out.println("MURDER");
+                            AlertBox.display("MURDERER DETECTED!!", "YOU WANT TO DELETE STUDENTS!!! POLICE!!!", "Nani?");
+                        } else if (server.valid_t(barcode_string)){
+                            t_sort(server.info_t(barcode_string));
+                            boolean option = OptionBox.display("Delete?", "Do you want to delete " + textbook_info[1][1] + " from the database?");
+                            if(option){
+                                server.delete_t(barcode_string);
+                                deletion_status.setText("Textbook Deleted!");
+                            } else{
+                                deletion_status.setText("Textbook has not been deleted!");
+                            }
+                        } else{
+                            AlertBox.display("ERROR", "WHAT U SCANNING IN BOI? My program legit cannot read it.", "I will treat machines better from now on");
+                        }
+                    } else{
+                        AlertBox.display("ERROR", "Learn to turn on the wifi boi", "0_0");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        Scene deleter_screen = new Scene(deleter_layout, resolution_x, resolution_y);
+        client_window.setScene(deleter_screen);
     }
 
     private void info_scanner(){
@@ -222,12 +276,17 @@ public class Main extends Application {
                 if (barcode_scanned.getBool() && in_scanner) {
                     System.out.println("BARCODE SCANNER");
                     try {
+                        current_barcode_label.setText("Current Barcode: " + barcode_string);
                         //***WORK IN PROGRESS
                         if (server.valid_s(barcode_string)) {
-                            AlertBox.display("Error", "Displaying student info is not a completed feature yet!", "Sry bro");
+                            //AlertBox.display("Error", "Displaying student info is not a completed feature yet!", "Sry bro");
+                            current_scanned_status.setText("Current Scanned: Student's Barcode");
+                            String student_info = server.info_s(barcode_string);
+                            System.out.println(student_info);
                         }
                         //***
                         else if (server.valid_t(barcode_string)) {
+                            current_scanned_status.setText("Current Scanned: Textbook's Barcode");
                             t_sort(server.info_t(barcode_string));
                             info_right.getChildren().clear();
                             info_right.getChildren().add(textbook_info_label);
@@ -446,6 +505,7 @@ public class Main extends Application {
             in_management = false;
             in_scanner = false;
             in_tscanner = false;
+            in_deleter = false;
         });
         return go_back;
     }
