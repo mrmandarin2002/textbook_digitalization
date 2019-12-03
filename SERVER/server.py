@@ -5,10 +5,6 @@ import socket
 # import database interaction functions
 from interactions import *
 
-# function to get the current time
-def get_time():
-    return str(datetime.now()).split()[1].split(".")[0]+" "
-
 # function to get the local ip address
 def get_local_address():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

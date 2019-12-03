@@ -12,7 +12,7 @@ def valid_student(args): # student number
     conn = Database.create_connection("server.db")
     students = Database.get_students(conn)
     for student in students:
-        if student[1] == int(args[0]):
+        if student[1] == str(args[0]):
             conn.close()
             return "1"
     conn.close()
@@ -24,7 +24,7 @@ def information_student(args): # student number
     conn = Database.create_connection("server.db")
     students = Database.get_students(conn)
     for student in students:
-        if student[1] == int(args[0]):
+        if student[1] == str(args[0]):
             student_strings = []
             for i in student:
                 student_strings.append(str(i))
@@ -37,7 +37,7 @@ def valid_textbook(args): # textbook number
     conn = Database.create_connection("server.db")
     textbooks = Database.get_textbooks(conn)
     for textbook in textbooks:
-        if textbook[1] == int(args[0]):
+        if textbook[1] == str(args[0]):
             conn.close()
             return "1"
     conn.close()
@@ -49,7 +49,7 @@ def information_textbook(args): # textbook number
     conn = Database.create_connection("server.db")
     textbooks = Database.get_textbooks(conn)
     for textbook in textbooks:
-        if textbook[1] == int(args[0]):
+        if textbook[1] == str(args[0]):
             textbook_strings = []
             for i in textbook:
                 textbook_strings.append(str(i))
