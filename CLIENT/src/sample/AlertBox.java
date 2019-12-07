@@ -14,13 +14,14 @@ public class AlertBox {
         Stage window = new Stage();
 
         window.initModality(Modality.APPLICATION_MODAL);
-        window.setTitle(title);
+        window.setTitle(title);a
         window.setMinWidth(250);
         window.getIcons().add(new Image("/icons/error_icon.png"));
 
         Label label = new Label();
         label.setText(message);
         Button closeButton = new Button(button_message);
+        closeButton.setFocusTraversable(false);
         closeButton.setOnAction(e -> window.close());
 
         VBox layout = new VBox(10);
