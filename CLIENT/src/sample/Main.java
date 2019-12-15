@@ -102,12 +102,11 @@ public class Main extends Application {
             //this is to get barcode input
             if(barcode_string.length() >= 5 && key.getCode() == KeyCode.ENTER) {
                 barcode_scanned.setBool(true);
+                System.out.println("IN BARCODE INPUT");
             }
         });
         //after initialization of everything, go to the welcome screen
         setWelcome_screen();
-
-
     }
 
     //welcome screen
@@ -208,6 +207,7 @@ public class Main extends Application {
 
         barcode_scanned.BoolProperty().addListener((v, oldValue, newValue) -> {
             if(in_deleter){
+                System.out.println("DELETER BARCODE");
                 try {
                     if(server.ping()){
                         if(server.valid_s(barcode_string)){
@@ -233,7 +233,6 @@ public class Main extends Application {
                 }
             }
         });
-
         Scene deleter_screen = new Scene(deleter_layout, resolution_x, resolution_y);
         client_window.setScene(deleter_screen);
     }
@@ -273,8 +272,8 @@ public class Main extends Application {
         //if a barcode is detected
         barcode_scanned.BoolProperty().addListener((v, oldValue, newValue) -> {
             if(in_scanner) {
-                if (barcode_scanned.getBool() && in_scanner) {
-                    System.out.println("BARCODE SCANNER");
+                System.out.println("INFOSCANNER BARCODE");
+                if (barcode_scanned.getBool()) {
                     try {
                         current_barcode_label.setText("Current Barcode: " + barcode_string);
                         //***WORK IN PROGRESS
@@ -435,8 +434,9 @@ public class Main extends Application {
         //if a barcode gets scanned in
         barcode_scanned.BoolProperty().addListener((v, oldValue, newValue) -> {
             if(in_tscanner) {
+                System.out.println("TSCANNER BARCODE");
                 if (barcode_scanned.getBool() && values_set[0]) {
-                    System.out.println("BARCODE TSCANNER");
+                    System.out.println("IN");
                     try {
                         if (server.ping()) {
                             String textbook_title = title_field.getText();

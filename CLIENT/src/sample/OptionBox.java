@@ -26,23 +26,23 @@ public class OptionBox {
         Label label = new Label();
         label.setText(question);
         Button yes_button = new Button("Oui");
+        yes_button.setFocusTraversable(false);
         yes_button.setOnAction(e->{
             answer = true;
             window.close();
         });
         Button no_button = new Button("Nein");
+        no_button.setFocusTraversable(false);
         no_button.setOnAction(e->{
            answer = false;
            window.close();
         });
-
         VBox layout = new VBox(10);
         HBox bottom_layout = new HBox(10);
         bottom_layout.getChildren().addAll(yes_button, no_button);
         layout.getChildren().addAll(label);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(12,12,12,12));
-
         BorderPane box_layout = new BorderPane();
         box_layout.setCenter(layout);
         box_layout.setBottom(bottom_layout);
