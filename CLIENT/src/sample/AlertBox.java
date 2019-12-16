@@ -14,7 +14,7 @@ public class AlertBox {
         Stage window = new Stage();
 
         window.initModality(Modality.APPLICATION_MODAL);
-        window.setTitle(title);a
+        window.setTitle(title);
         window.setMinWidth(250);
         window.getIcons().add(new Image("/icons/error_icon.png"));
 
