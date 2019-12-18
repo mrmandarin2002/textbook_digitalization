@@ -1,25 +1,39 @@
 #Digitext Program written in python as JavaFX is the definition of cancer
-
 import tkinter as tk                # python 3
 from tkinter import font  as tkfont # python 3
-import time, keyboard
+from tkinter import ttk
+import time
+from datetime import datetime
+from pynput.keyboard import Key, Listener
 
 MAIN_FONT = "Comic Sans MS"
 MAROON = '#B03060'
 PINK = '#FF00D4'
 NEON_GREEN = '#4DFF4D'
 
+
 class client(tk.Tk):
+
+    barcode_string = ""
+    barcode_scanned = False
+    start = datetime.now()
+    previous_time = 0
     
     def __init__(self, *args, **kwargs):
-        start = time.time()
         tk.Tk.__init__(self, *args, **kwargs)
 
         self.scene_list = (WelcomePage, Menu, TextbookManagement, TextbookInfo, TextbookScanner, TextbookDeleter)
+
+        #different type of fonts used throughout the program
         self.TITLE_FONT = tkfont.Font(family=MAIN_FONT, size=20, weight="bold")
+        self.SUBTITLE_FONT = tkfont.Font(family = MAIN_FONT, size = 14, weight = "bold")
+        self.FIELD_FONT = tkfont.Font(family = MAIN_FONT, size = 11)
         self.BUTTON_FONT = tkfont.Font(family=MAIN_FONT, size=10)
         self.BACK_BUTTON_FONT = tkfont.Font(family = MAIN_FONT, size = 8)
         self.MENU_FONT = tkfont.Font(family=MAIN_FONT, size=11)
+        
+        keyLis = Listener(on_press=self.on_press)
+        keyLis.start()
 
         container = tk.Frame(self)
         container.pack(side = "top", fill = "both", expand = True)
@@ -34,11 +48,27 @@ class client(tk.Tk):
             self.frames[page_name] = frame
             frame.grid(row = 0, column = 0, sticky = "nswe")
 
-        self.show_frame("WelcomePage")
+        self.show_frame("TextbookScanner")
+
+    ##for barcode input
+    def on_press(self, key):
+        total_elapsed = (datetime.now() - self.start).microseconds + (datetime.now() - self.start).seconds * 1000000
+        print(total_elapsed - self.previous_time)
+        if(total_elapsed - self.previous_time < 40000):
+            if(key != Key.enter and key != Key.shift):
+                self.barcode_string += str(key)[1:-1]
+            if(key == Key.enter and len(self.barcode_string) > 4):
+                print("BITCHHH!!")
+                exec(self.current_frame_name + ".barcode_scanned(self = self.current_frame, controller=self)")
+        else:
+            if(key != Key.enter and key != Key.shift):
+                self.barcode_string = str(key)
+        self.previous_time = total_elapsed  
 
     def show_frame(self, page_name):
-        frame = self.frames[page_name]
-        frame.tkraise()
+        self.current_frame = self.frames[page_name]
+        self.current_frame_name = page_name
+        self.current_frame.tkraise()
 
     #allows the creation of buttons
     def make_button(self, controller, d_text, scene, option):
@@ -51,6 +81,9 @@ class client(tk.Tk):
         return tk.Button(controller, text = "Back to Menu", command = lambda: self.show_frame("Menu"), font = self.BACK_BUTTON_FONT)
 
 class WelcomePage(tk.Frame):
+
+    def barcode_scanned(self, controller):
+        pass
     
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -63,6 +96,10 @@ class WelcomePage(tk.Frame):
         welcome_button.pack()
         
 class Menu(tk.Frame):
+    
+    def barcode_scanned(self, controller):
+        pass
+
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controlller = controller
@@ -80,18 +117,40 @@ class Menu(tk.Frame):
         i_button.pack()
 
 class TextbookManagement(tk.Frame):
+
+    def barcode_scanned(self, controller):
+        pass
+
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controlller = controller
 
-class TextbookScanner(tk.Frame):
+class TextbookScanner(tk.Frame): 
+
+    def barcode_scanned(self, controller):
+        print(controller.barcode_string)
+
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        self.controlller = controller
-
+        self.controller = controller
         TextbookScanner.configure(self, background = MAROON)
+
+        main_label = tk.Label(self, text="Textbook Scanner", font = controller.TITLE_FONT, bg = MAROON)
+        main_label.grid(row = 0, column = 0, padx = (178,0))
+        title_label = tk.Label(self, text = "Title:", font = controller.SUBTITLE_FONT, bg = MAROON)
+        title_label.grid(row = 1, column = 0, padx = 10, pady = (20, 0), sticky = "W")
+        price_label = tk.Label(self, text = "Condition:", font = controller.SUBTITLE_FONT, bg = MAROON)
+        price_label.grid(row = 3, column = 0, padx = 5, pady = 5, sticky = "W")
+
         back_button = controller.make_back_button(controller = self)
-        back_button.grid(row = 5, column = 0, padx = 5, pady = 5)
+        back_button.grid(row = 5, column = 0, padx = 5, pady = 5, sticky = "W")
+
+        title_entry = tk.Entry(self, font = controller.FIELD_FONT)
+        title_entry.grid(row = 2, column = 0, padx = 10, pady = 10, sticky = "W")
+        price_choices = ["New", "Good", "Fair", "Poor", "Destroyed"]
+        price_entry = ttk.Combobox(self, values = price_choices, text = controller.FIELD_FONT)
+        price_entry.set("New")
+        price_entry.grid(row = 4, column = 0, padx = 10, pady = 10, sticky = "W")
 
 
 class TextbookDeleter(tk.Frame):
