@@ -3,6 +3,7 @@ import tkinter as tk                # python 3
 from tkinter import font  as tkfont # python 3
 from tkinter import ttk
 import time
+import interactions
 from datetime import datetime
 from pynput.keyboard import Key, Listener
 
@@ -126,31 +127,48 @@ class TextbookManagement(tk.Frame):
         self.controlller = controller
 
 class TextbookScanner(tk.Frame): 
+    values_set = False
 
     def barcode_scanned(self, controller):
         print(controller.barcode_string)
+
+    def set_values(self, controller):
+        if(self.values_set):
+            self.set_button.config(text = "RESET")
+        else:
+            self.set_button.config(text = "Set Values")
+        self.values_set = not self.values_set
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         TextbookScanner.configure(self, background = MAROON)
-
+        
+        #labels
         main_label = tk.Label(self, text="Textbook Scanner", font = controller.TITLE_FONT, bg = MAROON)
         main_label.grid(row = 0, column = 0, padx = (178,0))
         title_label = tk.Label(self, text = "Title:", font = controller.SUBTITLE_FONT, bg = MAROON)
         title_label.grid(row = 1, column = 0, padx = 10, pady = (20, 0), sticky = "W")
-        price_label = tk.Label(self, text = "Condition:", font = controller.SUBTITLE_FONT, bg = MAROON)
-        price_label.grid(row = 3, column = 0, padx = 5, pady = 5, sticky = "W")
+        condition_label = tk.Label(self, text = "Condition:", font = controller.SUBTITLE_FONT, bg = MAROON)
+        condition_label.grid(row = 3, column = 0, padx = 5, pady = 5, sticky = "W")
+        price_label = tk.Label(self, text = "Price:", font = controller.SUBTITLE_FONT, bg = MAROON)
+        price_label.grid(row = 5, column = 0, padx = 10, pady = 10, sticky = "W")
 
+        #buttons
         back_button = controller.make_back_button(controller = self)
-        back_button.grid(row = 5, column = 0, padx = 5, pady = 5, sticky = "W")
+        back_button.grid(row = 8, column = 0, padx = 5, pady = 5, sticky = "W")
+        self.set_button = tk.Button(self, text = "Set Values", command = lambda : self.set_values(controller = controller.current_frame), font = controller.BUTTON_FONT)
+        self.set_button.grid(row = 7, column = 0, padx = 10, pady = 10, sticky = "W")
 
+        #entry points
         title_entry = tk.Entry(self, font = controller.FIELD_FONT)
         title_entry.grid(row = 2, column = 0, padx = 10, pady = 10, sticky = "W")
-        price_choices = ["New", "Good", "Fair", "Poor", "Destroyed"]
-        price_entry = ttk.Combobox(self, values = price_choices, text = controller.FIELD_FONT)
-        price_entry.set("New")
-        price_entry.grid(row = 4, column = 0, padx = 10, pady = 10, sticky = "W")
+        price_entry = tk.Entry(self, font = controller.FIELD_FONT)
+        price_entry.grid(row = 6, column = 0, padx = 10, pady = 10, sticky = "W")
+        condition_choices = ["New", "Good", "Fair", "Poor", "Destroyed"]
+        condition_entry = ttk.Combobox(self, values = condition_choices, text = controller.FIELD_FONT)
+        condition_entry.set("New")
+        condition_entry.grid(row = 4, column = 0, padx = 10, pady = 10, sticky = "W")
 
 
 class TextbookDeleter(tk.Frame):
