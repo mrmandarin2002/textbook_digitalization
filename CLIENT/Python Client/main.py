@@ -2,6 +2,7 @@
 import tkinter as tk                # python 3
 from tkinter import font  as tkfont # python 3
 from tkinter import ttk
+from tkinter import messagebox
 import time
 
 #import own files
@@ -64,8 +65,7 @@ class client(tk.Tk):
                 exec(self.current_frame_name + ".barcode_scanned(self = self.current_frame, controller=self)")
         else:
             if(key != Key.enter and key != Key.shift):
-                self.barcode_string = str(key)
-            print(self.server.ping())
+                self.barcode_string = str(key)[1:-1]
         self.previous_time = total_elapsed  
 
     def show_frame(self, page_name):
@@ -129,23 +129,53 @@ class TextbookManagement(tk.Frame):
         self.controlller = controller
 
 class TextbookScanner(tk.Frame): 
-    values_set = True
+    values_set = False
     current_title = ""
     current_price = 0
     current_condition = 0
+    num_scanned = 0
 
     def barcode_scanned(self, controller):
-        print(controller.barcode_string)
+        if(self.set_values):
+            if(controller.server.ping()):
+                if(controller.server.valid_t(controller.barcode_string)):
+                    textbook_info = controller.server.info_t(controller.barcode_string)
+                    if(textbook_info[1] == self.current_title and float(textbook_info[2]) == self.current_price):
+                        messagebox.showerror("Error", "This textbook has the same values as the set values")                        
+                    else:
+                        MsgOption = messagebox.askyesno("Textbook already in database!", "Would you like to replace the original values?")
+                        if(MsgOption == "yes"):
+                            controller.server.delete_t(controller.barcode_string)
+                            controller.server.add_t(controller.barcode_string, self.current_title, str(self.current_price), str(self.current_condition))
+                elif(controller.server.valid_s(controller.barcode_string)):
+                    messagebox.showwarning("Warning!", "You are scanning in a student's barcode ID!")
+                else:
+                    self.num_scanned += 1
+                    self.barcode_label.config(text = "Current Barcode: " + controller.barcode_string)
+                    self.textbook_label.config(text = "Number of textbooks scanned: " + str(self.num_scanned))
+                    self.current_condition = calculations.get_textbook_condition(self.condition_entry.get())
+                    controller.server.add_t(controller.barcode_string, self.current_title, str(self.current_price), str(self.current_condition))
+        else:
+            messagebox.showerror("Error", "Please set the values before scanning in a barcode")
 
     def set_values(self, controller):
         if(self.values_set):
-            self.set_button.config(text = "RESET")
-            
+            self.set_button.config(text = "SET VALUES")
+            self.title_entry.config(state = "normal")
+            self.price_entry.config(state = "normal")
+            self.textbook_label.config(text = "Number of textbooks scanned:")
+            self.num_scanned = 0
         else:
-            self.set_button.config(text = "Set Values")
+            price_string = self.price_entry.get()
+            self.set_button.config(text = "RESET")
+            if(price_string.isnumeric()):
+                self.current_price = float(price_string)
+                self.textbook_label.config(text = "Number of textbooks scanned: " + str(self.num_scanned))
+                self.title_entry.config(state = "disabled")
+                self.price_entry.config(state = "disabled")
+            else:
+                messagebox.showerror("Error", "Please make sure that the price is actually a number")
         self.values_set = not self.values_set
-        self.current_condition = calculations.get_textbook_condition(self.condition_entry.get())
-        self.current_price = calculations.get_price()
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -154,17 +184,17 @@ class TextbookScanner(tk.Frame):
         
         #labels
         main_label = tk.Label(self, text="Textbook Scanner", font = controller.TITLE_FONT, bg = MAROON)
-        main_label.grid(row = 0, column = 0, padx = (178,0))
+        main_label.grid(row = 0, column = 0, padx = (50,0))
         title_label = tk.Label(self, text = "Title:", font = controller.SUBTITLE_FONT, bg = MAROON)
         title_label.grid(row = 1, column = 0, padx = 10, pady = (20, 0), sticky = "W")
         condition_label = tk.Label(self, text = "Condition:", font = controller.SUBTITLE_FONT, bg = MAROON)
         condition_label.grid(row = 3, column = 0, padx = 5, pady = 5, sticky = "W")
         price_label = tk.Label(self, text = "Price:", font = controller.SUBTITLE_FONT, bg = MAROON)
-        price_label.grid(row = 5, column = 0, padx = 10, pady = 10, sticky = "W")
+        price_label.grid(row = 5, column = 0, padx = 10, pady = 5, sticky = "W")
         self.barcode_label = tk.Label(self, text = "Current Barcode: ", font = controller.MENU_FONT, bg = MAROON)
-        self.barcode_label.grid(row = 1, column = 0, padx= (290,0) , pady = (20,0), sticky = "W")
+        self.barcode_label.grid(row = 3, column = 0, padx= (290,0) , pady = (20,0), sticky = "W")
         self.textbook_label = tk.Label(self, text = "Number of textbooks scanned: ", font = controller.MENU_FONT, bg = MAROON)
-        self.textbook_label.grid(row = 2, column = 0, padx = (290, 0), sticky = "W")
+        self.textbook_label.grid(row = 4, column = 0, padx = (290, 0), sticky = "W")
 
         #buttons
         back_button = controller.make_back_button(controller = self)
@@ -178,7 +208,7 @@ class TextbookScanner(tk.Frame):
         self.price_entry = tk.Entry(self, font = controller.FIELD_FONT)
         self.price_entry.grid(row = 6, column = 0, padx = 10, pady = (0,10), sticky = "W")
         self.condition_choices = ["New", "Good", "Fair", "Poor", "Destroyed"]
-        self.condition_entry = ttk.Combobox(self, values = self.condition_choices,  state = "readonly")
+        self.condition_entry = ttk.Combobox(self, values = self.condition_choices, font = controller.FIELD_FONT, state = "readonly", width = 10)
         self.condition_entry.set("New")
         self.condition_entry.grid(row = 4, column = 0, padx = 10, pady = (0,10), sticky = "W")
 

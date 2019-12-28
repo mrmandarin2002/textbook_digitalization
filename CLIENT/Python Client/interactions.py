@@ -1,4 +1,5 @@
 import socket
+from tkinter import messagebox
 
 class Client:
 
@@ -24,6 +25,7 @@ class Client:
             data = self.udp_socket.recvfrom(4096)[0]
             return data.decode("utf-8") # return decoded data
         except: # if a timeout exception was thrown
+            messagebox.showerror("Connection Error", "Server is not connected")
             return "_"
 
     # command method

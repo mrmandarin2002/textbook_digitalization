@@ -13,5 +13,5 @@ def get_textbook_condition(condition):
         return 1e9
 
 def get_price(price):
-    
+    pass
     
