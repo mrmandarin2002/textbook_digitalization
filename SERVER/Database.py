@@ -19,7 +19,7 @@ def insert_student(conn, number, name, deposit):
     # create a cursor object
     cur = conn.cursor()
     # execute the sql command string using the function parameters
-    cur.execute(sql_cmd, (number, name, deposit))
+    cur.execute(sql_cmd, (str(number), str(name), float(deposit)))
     cur.close() # close the cursor object
     # commit the changes to the database
     conn.commit()
