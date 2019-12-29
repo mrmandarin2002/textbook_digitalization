@@ -134,7 +134,7 @@ class TextbookScanner(tk.Frame):
     num_scanned = 0
 
     def barcode_scanned(self, controller):
-        if(self.set_values):
+        if(self.values_set):
             if(controller.server.ping()):
                 if(controller.server.valid_t(controller.barcode_string)):
                     textbook_info = controller.server.info_t(controller.barcode_string)
@@ -163,7 +163,7 @@ class TextbookScanner(tk.Frame):
             self.price_entry.config(state = "normal")
             self.textbook_label.config(text = "Number of textbooks scanned:")
             self.num_scanned = 0
-            self.values_set = not self.values_set
+            self.values_set = False
         else:
             price_string = self.price_entry.get()
             try:
@@ -172,7 +172,7 @@ class TextbookScanner(tk.Frame):
                 self.textbook_label.config(text = "Number of textbooks scanned: " + str(self.num_scanned))
                 self.title_entry.config(state = "disabled")
                 self.price_entry.config(state = "disabled")
-                self.values_set = not self.values_set
+                self.values_set = True
             except ValueError:
                 messagebox.showerror("Error", "Please make sure that the price is actually a number")
 
@@ -224,6 +224,7 @@ class Info(tk.Frame):
                 ###
             if(controller.server.valid_t(controller.barcode_string)):
                 textbook_info = controller.server.info_t(controller.barcode_string)
+                print(textbook_info)
                 self.barcode_status_label.config(text = "Barcode Type: Textbook")
                 self.textbook_title_label.config(text = "Textbook Title: " + textbook_info[1])
                 self.textbook_condition_label.config(text = "Textbook Condition " + calculations.get_textbook_condition_rev(textbook_info[3]))
