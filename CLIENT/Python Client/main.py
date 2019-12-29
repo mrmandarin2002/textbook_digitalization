@@ -19,9 +19,11 @@ NEON_GREEN = '#4DFF4D'
 class client(tk.Tk):
 
     barcode_string = ""
+    last_barcode_string = ""
     barcode_scanned = False
     start = datetime.now()
     previous_time = 0
+    version = "teacher"
     
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -62,6 +64,7 @@ class client(tk.Tk):
             if(key != Key.enter and key != Key.shift):
                 self.barcode_string += str(key)[1:-1]
             if(key == Key.enter and len(self.barcode_string) > 4):
+                self.last_barcode_string = self.barcode_string
                 exec(self.current_frame_name + ".barcode_scanned(self = self.current_frame, controller=self)")
         else:
             if(key != Key.enter and key != Key.shift):
@@ -71,6 +74,7 @@ class client(tk.Tk):
     def show_frame(self, page_name):
         self.current_frame = self.frames[page_name]
         self.current_frame_name = page_name
+        exec(self.current_frame_name + ".clear(self = self.current_frame)")
         self.current_frame.tkraise()
 
     #allows the creation of buttons
@@ -84,6 +88,9 @@ class client(tk.Tk):
         return tk.Button(controller, text = "Back to Menu", command = lambda: self.show_frame("Menu"), font = self.BACK_BUTTON_FONT)
 
 class WelcomePage(tk.Frame):
+
+    def clear(self):
+        pass
 
     def barcode_scanned(self, controller):
         pass
@@ -99,6 +106,9 @@ class WelcomePage(tk.Frame):
         welcome_button.pack()
         
 class Menu(tk.Frame):
+
+    def clear(self):
+        pass
     
     def barcode_scanned(self, controller):
         pass
@@ -119,6 +129,9 @@ class Menu(tk.Frame):
 
 class TextbookManagement(tk.Frame):
 
+    def clear(self):
+        pass
+
     def barcode_scanned(self, controller):
         pass
 
@@ -132,6 +145,9 @@ class TextbookScanner(tk.Frame):
     current_price = 0
     current_condition = 0
     num_scanned = 0
+
+    def clear(self):
+        pass
 
     def barcode_scanned(self, controller):
         if(self.values_set):
@@ -213,7 +229,17 @@ class TextbookScanner(tk.Frame):
 
 class Info(tk.Frame):
 
+    current_barcode_string = ""
+
+    def clear(self):
+        self.barcode_label.config(text = "Current Barcode: ")
+        self.barcode_status_label.config(text = "Barcode Type: ")
+        self.textbook_title_label.config(text = "Textbook Titile: ")
+        self.textbook_condition_label.config(text = "Textbook Condition: ")
+        self.textbook_price_label.config(text = "Textbook Price: ")
+
     def barcode_scanned(self, controller):
+        self.current_barcode_string = controller.barcode_string
         if(controller.server.ping()):
             self.barcode_label.config(text = "Current Barcode: " + str(controller.barcode_string))
             #if(controller.server.valid_s(controller.barcode_string)):
@@ -227,10 +253,23 @@ class Info(tk.Frame):
                 print(textbook_info)
                 self.barcode_status_label.config(text = "Barcode Type: Textbook")
                 self.textbook_title_label.config(text = "Textbook Title: " + textbook_info[1])
-                self.textbook_condition_label.config(text = "Textbook Condition " + calculations.get_textbook_condition_rev(textbook_info[3]))
+                self.textbook_condition_label.config(text = "Textbook Condition: " + calculations.get_textbook_condition_rev(textbook_info[3]))
                 self.textbook_price_label.config(text = "Textbook Price: " + textbook_info[2])
             else:
                 messagebox.showerror("Fatal Error", "WTF DID YOU SCAN IN BOI????")
+
+    def delete_textbook(self, controller):
+        if(controller.server.ping()):
+            if(controller.server.valid_s(self.current_barcode_string)):
+                messagebox.showerror("Error", "You cannot delete students")
+            elif(controller.server.valid_t(self.current_barcode_string)):
+                MsgOption = messagebox.askyesno("Warning!", "Are you sure you would like to delete this textbook?")
+                if(MsgOption == True):
+                    controller.server.delete_t(self.current_barcode_string)
+                    self.clear()
+            else:
+                messagebox.showerror("Error", "Invalid barcode")
+             
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -259,8 +298,13 @@ class Info(tk.Frame):
         self.student_grade_label = tk.Label(self, text = "Student Grade: ", font = controller.MENU_FONT, bg = MAROON)
         self.student_grade_label.grid(row = 7, column = 0, padx = 10, sticky = "W")
 
+        pady_dif_back = 0
+        if(controller.version == "teacher"):
+            delete_button = tk.Button(self, text = "Delete Textbook", font = controller.MENU_FONT, command = lambda: self.delete_textbook(controller = controller))
+            delete_button.grid(row = 8, column = 0, padx = 10, pady = (20, 0), sticky = "W")    
+            pady_dif_back = 50    
         back_button = controller.make_back_button(controller = self)
-        back_button.grid(row = 8, column = 0, padx = 10, pady = (142,0), sticky = "W")
+        back_button.grid(row = 9, column = 0, padx = 10, pady = (142 - pady_dif_back,0), sticky = "W")
 
 if __name__ =='__main__':
     root = client()
