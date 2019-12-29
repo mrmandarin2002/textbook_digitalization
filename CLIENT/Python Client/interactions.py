@@ -59,9 +59,9 @@ class Client:
     # student id validation method
     def valid_s(self, student_id):
         if self.command("valid_s", [student_id]) == "1":
-            return False
-        else:
             return True
+        else:
+            return False
 
     # delete a textbook from the database
     def delete_t(self, textbook_id):
