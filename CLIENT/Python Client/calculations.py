@@ -12,6 +12,21 @@ def get_textbook_condition(condition):
     else:
         return 1e9
 
+def get_textbook_condition_rev(condition):
+    condition = int(condition)
+    if(condition == 0):
+        return "New"
+    elif(condition == 1):
+        return "Good"
+    elif(condition == 2):
+        return "Fair"
+    elif(condition == 3):
+        return "Poor"
+    elif(condition == 4):
+        return "Destroyed"
+    else:
+        return "DAFUQ"
+
 def get_price(price):
     pass
     

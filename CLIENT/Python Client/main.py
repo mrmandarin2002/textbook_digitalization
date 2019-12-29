@@ -27,7 +27,7 @@ class client(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
 
         self.server = interactions.Client(address = "127.0.0.1", port = 7356)
-        self.scene_list = (WelcomePage, Menu, TextbookManagement, TextbookInfo, TextbookScanner, TextbookDeleter)
+        self.scene_list = (WelcomePage, Menu, TextbookManagement, Info, TextbookScanner)
 
         #different type of fonts used throughout the program
         self.TITLE_FONT = tkfont.Font(family=MAIN_FONT, size=20, weight="bold")
@@ -53,7 +53,7 @@ class client(tk.Tk):
             self.frames[page_name] = frame
             frame.grid(row = 0, column = 0, sticky = "nswe")
 
-        self.show_frame("TextbookScanner")
+        self.show_frame("Info")
 
     ##for barcode input
     def on_press(self, key):
@@ -111,12 +111,10 @@ class Menu(tk.Frame):
         menu_title = tk.Label(self, text = "DigiText Menu", font = controller.TITLE_FONT , bg = MAROON)
         m_button = controller.make_button(controller = self, d_text = "Textbook Management", scene = "TextbookManagement", option = "menu")
         s_button = controller.make_button(controller = self, d_text = "Textbook Scanner", scene = "TextbookScanner", option = "menu")
-        d_button = controller.make_button(controller = self, d_text = "Textbook Deleter", scene = "TextbookDeleter", option = "menu")
-        i_button = controller.make_button(controller = self, d_text = "Textbook Info", scene = "TextbookInfo", option = "menu")
+        i_button = controller.make_button(controller = self, d_text = "Info Scanner", scene = "Info", option = "menu")
         menu_title.pack(pady = (100, 0))
         m_button.pack(pady = (50, 0))
         s_button.pack()
-        d_button.pack()
         i_button.pack()
 
 class TextbookManagement(tk.Frame):
@@ -165,17 +163,18 @@ class TextbookScanner(tk.Frame):
             self.price_entry.config(state = "normal")
             self.textbook_label.config(text = "Number of textbooks scanned:")
             self.num_scanned = 0
+            self.values_set = not self.values_set
         else:
             price_string = self.price_entry.get()
-            self.set_button.config(text = "RESET")
-            if(price_string.isnumeric()):
+            try:
                 self.current_price = float(price_string)
+                self.set_button.config(text = "RESET")
                 self.textbook_label.config(text = "Number of textbooks scanned: " + str(self.num_scanned))
                 self.title_entry.config(state = "disabled")
                 self.price_entry.config(state = "disabled")
-            else:
+                self.values_set = not self.values_set
+            except ValueError:
                 messagebox.showerror("Error", "Please make sure that the price is actually a number")
-        self.values_set = not self.values_set
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -184,7 +183,7 @@ class TextbookScanner(tk.Frame):
         
         #labels
         main_label = tk.Label(self, text="Textbook Scanner", font = controller.TITLE_FONT, bg = MAROON)
-        main_label.grid(row = 0, column = 0, padx = (50,0))
+        main_label.grid(row = 0, column = 0, padx = (95,0))
         title_label = tk.Label(self, text = "Title:", font = controller.SUBTITLE_FONT, bg = MAROON)
         title_label.grid(row = 1, column = 0, padx = 10, pady = (20, 0), sticky = "W")
         condition_label = tk.Label(self, text = "Condition:", font = controller.SUBTITLE_FONT, bg = MAROON)
@@ -198,7 +197,7 @@ class TextbookScanner(tk.Frame):
 
         #buttons
         back_button = controller.make_back_button(controller = self)
-        back_button.grid(row = 8, column = 0, padx = 10, pady = (100,0), sticky = "W")
+        back_button.grid(row = 8, column = 0, padx = 10, pady = (120,0), sticky = "W")
         self.set_button = tk.Button(self, text = "Set Values", command = lambda : self.set_values(controller = controller.current_frame), font = controller.BUTTON_FONT)
         self.set_button.grid(row = 7, column = 0, padx = 10, pady = 10, sticky = "W")
 
@@ -212,16 +211,55 @@ class TextbookScanner(tk.Frame):
         self.condition_entry.set("New")
         self.condition_entry.grid(row = 4, column = 0, padx = 10, pady = (0,10), sticky = "W")
 
+class Info(tk.Frame):
 
-class TextbookDeleter(tk.Frame):
+    def barcode_scanned(self, controller):
+        if(controller.server.ping()):
+            self.barcode_label.config(text = "Current Barcode: " + str(controller.barcode_string))
+            #if(controller.server.valid_s(controller.barcode_string)):
+             #   print("YES")
+              #  self.barcode_status_label.config(text = "Barcode Type: Student")
+                ###
+                #waiting for powerschool stuff to be completed
+                ###
+            if(controller.server.valid_t(controller.barcode_string)):
+                textbook_info = controller.server.info_t(controller.barcode_string)
+                self.barcode_status_label.config(text = "Barcode Type: Textbook")
+                self.textbook_title_label.config(text = "Textbook Title: " + textbook_info[1])
+                self.textbook_condition_label.config(text = "Textbook Condition " + calculations.get_textbook_condition_rev(textbook_info[3]))
+                self.textbook_price_label.config(text = "Textbook Price: " + textbook_info[2])
+            else:
+                messagebox.showerror("Fatal Error", "WTF DID YOU SCAN IN BOI????")
+
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        self.controlller = controller
+        self.controller = controller
 
-class TextbookInfo(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.controlller = controller
+        Info.configure(self, background = MAROON)
+
+        self.barcode_label = tk.Label(self, text = "Current Barcode: ", font = controller.MENU_FONT, bg = MAROON)
+        self.barcode_label.grid(row = 0, column = 0, padx = 10, pady = 10, sticky = "W")
+        self.barcode_status_label = tk.Label(self, text = "Barcode Type: ", font = controller.MENU_FONT, bg = MAROON)
+        self.barcode_status_label.grid(row = 0, column = 0, padx = 10, pady = (40, 0), sticky = "W")
+        
+        textbook_info_label = tk.Label(self, text = "Textbook Info", font = controller.SUBTITLE_FONT, bg = MAROON)
+        textbook_info_label.grid(row = 1, column = 0, padx = 10, pady = (30, 0),  sticky = "W")
+        self.textbook_title_label = tk.Label(self, text = "Textbook Title: ", font = controller.MENU_FONT, bg = MAROON)
+        self.textbook_title_label.grid(row = 2, column = 0, padx = 10, sticky = "W")
+        self.textbook_condition_label = tk.Label(self, text = "Textbook Condition: ", font = controller.MENU_FONT, bg = MAROON)
+        self.textbook_condition_label.grid(row = 3, column = 0, padx = 10, sticky = "W")
+        self.textbook_price_label = tk.Label(self, text = "Textbook Price: ", font = controller.MENU_FONT, bg = MAROON)
+        self.textbook_price_label.grid(row = 4, column = 0, padx = 10, sticky = "W")
+
+        student_info_label = tk.Label(self, text = "Student Info", font = controller.SUBTITLE_FONT, bg = MAROON)
+        student_info_label.grid(row = 5, column = 0, padx = 10, pady = (30, 0),  sticky = "W")
+        self.student_name_label = tk.Label(self, text = "Student Name: ", font = controller.MENU_FONT, bg = MAROON)
+        self.student_name_label.grid(row = 6, column = 0, padx = 10, sticky = "W")
+        self.student_grade_label = tk.Label(self, text = "Student Grade: ", font = controller.MENU_FONT, bg = MAROON)
+        self.student_grade_label.grid(row = 7, column = 0, padx = 10, sticky = "W")
+
+        back_button = controller.make_back_button(controller = self)
+        back_button.grid(row = 8, column = 0, padx = 10, pady = (142,0), sticky = "W")
 
 if __name__ =='__main__':
     root = client()
