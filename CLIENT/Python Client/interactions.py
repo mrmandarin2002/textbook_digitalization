@@ -35,8 +35,9 @@ class Client:
             # create initial message string, including the first element of the arguments list
             msg = cmd+";"+args[0]
             # add remaining elements of the arguments array
-            for arg in args:
-                msg += "|"+arg
+            if len(args) > 1:
+                for arg in args[1:]:
+                    msg += "|"+arg
             # return the response of the fully formed message string
             return self.echo(msg)
         else:
