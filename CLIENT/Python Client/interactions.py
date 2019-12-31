@@ -50,19 +50,16 @@ class Client:
         else:
             return False
 
-    # textbook id validation method
-    def valid_t(self, textbook_id):
-        if self.command("valid_t", [textbook_id]) == "1":
-            return True
-        else:
-            return False
-
     # student id validation method
     def valid_s(self, student_id):
         if self.command("valid_s", [student_id]) == "1":
             return True
         else:
             return False
+
+    # get student information
+    def info_s(self, student_id):
+        return self.command("info_s", [student_id]).split("|")
 
     # delete a textbook from the database
     def delete_t(self, textbook_id):
@@ -72,10 +69,17 @@ class Client:
     def add_t(self, textbook_id, textbook_name, textbook_price, textbook_condition):
         return self.command("add_t", [textbook_id, textbook_name, textbook_price, textbook_condition])
 
+    # textbook id validation method
+    def valid_t(self, textbook_id):
+        if self.command("valid_t", [textbook_id]) == "1":
+            return True
+        else:
+            return False
+
     # get textbook information from the database
     def info_t(self, textbook_id):
         return self.command("info_t", [textbook_id]).split("|")
 
-    # get student information
-    def info_s(self, student_id):
-        return self.command("info_s", [student_id]).split("|")
+    # assign textbook to student in database
+    def assign_t(self, textbook_id, student_id):
+        return self.command("assign_t", [textbook_id, student_id])
