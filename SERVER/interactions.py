@@ -18,6 +18,13 @@ def valid_student(args): # student number
     conn.close()
     return "0"
 
+# adds a student to the database
+def add_student(args):
+    conn = Database.create_connection("server.db")
+    Database.insert_student(conn, args[0], args[1], args[2])
+    conn.close()
+    return "1"
+
 # gets student information from the database
 def information_student(args): # student number
     print(get_time()+"Returning information of textbook "+args[0]+"...")
@@ -30,6 +37,13 @@ def information_student(args): # student number
                 student_strings.append(str(i))
             conn.close()
             return "|".join(student_strings)
+
+# get textbooks assigned to a student
+def student_textbooks(args): # student number
+    print(get_time()+"Returning textbooks currently held by student: "+args[0])
+    conn = Database.create_connection("server.db")
+    for textbook in Database.get_textbooks(conn):
+        print(textbook)
 
 # checks if a textbook is valid in the database
 def valid_textbook(args): # textbook number
@@ -101,6 +115,7 @@ interact = {"valid_t": valid_textbook,
             "info_s": information_student,
             "delete_t": delete_textbook,
             "add_t": add_textbook,
+            "add_s": add_student,
             "assign_t": assign_textbook,
             "return_t": return_textbook,
             "p": ping}
