@@ -1,5 +1,10 @@
 import sqlite3
 from sqlite3 import Error
+import os, shutil
+
+def reset_database(db_file, db_backup):
+    os.remove(db_file)
+    shutil.copy(db_backup, db_file)
 
 def create_connection(db_file):
     conn = None
@@ -68,9 +73,9 @@ def insert_textbook(conn, number, title, cost, condition):
     cur.close()
     return TextbookId
 
-def remove_textbook(conn, TextbookId):
+def remove_textbook(conn, TextbookNumber):
     # create an sql command string using the function parameter
-    sql_cmd = "DELETE FROM Textbooks WHERE TextbookNumber="+str(TextbookId)+";"
+    sql_cmd = "DELETE FROM Textbooks WHERE TextbookNumber="+str(TextbookNumber)+";"
     # create a cursor object
     cur = conn.cursor()
     # execute the sql command string
@@ -88,3 +93,29 @@ def get_textbooks(conn):
     result = cur.fetchall()
     cur.close()
     return result
+
+def assign_textbook(conn, TextbookNumber, StudentNumber):
+    # get textbook information
+    for t in get_textbooks(conn):
+        if t[1] == TextbookNumber:
+            textbook = list(t)
+    if textbook:
+        textbook[5] = StudentNumber
+        textbook.append(textbook[0])
+        textbook = textbook[1:]
+        # create a cursor object
+        cur = conn.cursor()
+        # create an sql command string to update textbooks table with new information
+        sql = """UPDATE Textbooks
+                SET TextbookNumber = ? ,
+                    TextbookTitle = ? ,
+                    TextbookCost = ? ,
+                    TextbookCondition = ? ,
+                    StudentNumber = ?
+                WHERE TextbookId = ?"""
+        # execute sql command string with selected textbook as input parameters and close cursor object
+        print(textbook)
+        cur.execute(sql, textbook)
+        cur.close()
+        # commit the changed database
+        conn.commit()

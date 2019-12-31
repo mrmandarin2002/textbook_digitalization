@@ -2,6 +2,9 @@
 from datetime import datetime
 import socket
 
+get_time = None
+interact = None
+
 # import database interaction functions
 from interactions import *
 

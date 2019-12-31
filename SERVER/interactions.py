@@ -53,7 +53,7 @@ def information_textbook(args): # textbook number
             textbook_strings = []
             for i in textbook:
                 textbook_strings.append(str(i))
-            textbook_strings[-1] = str(Database.get_studentNumber(conn, textbook_strings[-1]))
+            # textbook_strings[-1] = str(Database.get_studentNumber(conn, textbook_strings[-1]))
             conn.close()
             return "|".join(textbook_strings[1:])
 
@@ -73,6 +73,14 @@ def add_textbook(args): # textbook number, title, cost, condition
     conn.close()
     return "1"
 
+# assign a textbook to a student in the database
+def assign_textbook(args): # textbook number, student number
+    print(get_time()+"Assigning textbook: "+args[0]+" to student: "+args[1]+" in database...")
+    conn = Database.create_connection("server.db")
+    Database.assign_textbook(conn, args[0], args[1])
+    conn.close()
+    return "1"
+
 # ping (always return 1)
 def ping(args): # no arguments
     print(get_time()+"Received ping...")
@@ -85,4 +93,5 @@ interact = {"valid_t": valid_textbook,
             "info_s": information_student,
             "delete_t": delete_textbook,
             "add_t": add_textbook,
+            "assign_t": assign_textbook,
             "p": ping}
