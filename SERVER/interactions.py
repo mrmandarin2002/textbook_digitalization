@@ -81,6 +81,14 @@ def assign_textbook(args): # textbook number, student number
     conn.close()
     return "1"
 
+# return a textbook from a student in the database
+def return_textbook(args):
+    print(get_time()+"Returning textbook: "+args[0]+" from student...")
+    conn = Database.create_connection("server.db")
+    Database.assign_textbook(conn, args[0], "None")
+    conn.close()
+    return "1"
+
 # ping (always return 1)
 def ping(args): # no arguments
     print(get_time()+"Received ping...")
@@ -94,4 +102,5 @@ interact = {"valid_t": valid_textbook,
             "delete_t": delete_textbook,
             "add_t": add_textbook,
             "assign_t": assign_textbook,
+            "return_t": return_textbook,
             "p": ping}

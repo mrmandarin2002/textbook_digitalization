@@ -83,3 +83,7 @@ class Client:
     # assign textbook to student in database
     def assign_t(self, textbook_id, student_id):
         return self.command("assign_t", [textbook_id, student_id])
+
+    # retun textbook from student in database
+    def return_t(self, textbook_id):
+        return self.command("return_t", [textbook_id])
