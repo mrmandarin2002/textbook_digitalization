@@ -55,7 +55,7 @@ class client(tk.Tk):
             self.frames[page_name] = frame
             frame.grid(row = 0, column = 0, sticky = "nswe")
 
-        self.show_frame("Info")
+        self.show_frame("TextbookManagement")
 
     ##for barcode input
     def on_press(self, key):
@@ -129,15 +129,61 @@ class Menu(tk.Frame):
 
 class TextbookManagement(tk.Frame):
 
+    student_scanned = False
+
     def clear(self):
-        pass
+        self.barcode_label.config(text = "Current Barcode: ")
+        self.barcode_status_label.config(text = "Barcode Type: ")
+        self.textbook_title_label.config(text = "Textbook Titile: ")
+        self.textbook_condition_label.config(text = "Textbook Condition: ")
+        self.textbook_price_label.config(text = "Textbook Price: ")
+        self.student_tnum_label.config(text = "Number of textbooks taken out: ")
 
     def barcode_scanned(self, controller):
-        pass
+        if(controller.server.ping()):
+            if(controller.server.valid_s(controller.last_barcode_string)):
+                self.clear()
+            elif(controller.server.valid_t(controller.last_barcode_string)):
+                if(student_scanned):
+                    pass
+                    ###
+                    #waiting for ability to assign textbooks to students
+                    ###
+                else:
+                    messagebox.showerror("Error", "You gotta scan in a student's barcode first my dude...")
+            else:
+                messagebox.showerror("Error", "I don't know what you scanned in my dude")
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controlller = controller
+        TextbookManagement.configure(self, background = MAROON)
+        
+        self.barcode_label = tk.Label(self, text = "Current Barcode: ", font = controller.MENU_FONT, bg = MAROON)
+        self.barcode_label.grid(row = 0, column = 0, padx = 10, pady = 10, sticky = "W")
+        self.barcode_status_label = tk.Label(self, text = "Barcode Type: ", font = controller.MENU_FONT, bg = MAROON)
+        self.barcode_status_label.grid(row = 0, column = 0, padx = 10, pady = (40, 0), sticky = "W")
+        
+        textbook_info_label = tk.Label(self, text = "Textbook Info", font = controller.SUBTITLE_FONT, bg = MAROON)
+        textbook_info_label.grid(row = 1, column = 0, padx = 10, pady = (30, 0),  sticky = "W")
+        self.textbook_title_label = tk.Label(self, text = "Textbook Title: ", font = controller.MENU_FONT, bg = MAROON)
+        self.textbook_title_label.grid(row = 2, column = 0, padx = 10, sticky = "W")
+        self.textbook_condition_label = tk.Label(self, text = "Textbook Condition: ", font = controller.MENU_FONT, bg = MAROON)
+        self.textbook_condition_label.grid(row = 3, column = 0, padx = 10, sticky = "W")
+        self.textbook_price_label = tk.Label(self, text = "Textbook Price: ", font = controller.MENU_FONT, bg = MAROON)
+        self.textbook_price_label.grid(row = 4, column = 0, padx = 10, sticky = "W")
+
+        student_info_label = tk.Label(self, text = "Student Info", font = controller.SUBTITLE_FONT, bg = MAROON)
+        student_info_label.grid(row = 5, column = 0, padx = 10, pady = (30, 0),  sticky = "W")
+        self.student_name_label = tk.Label(self, text = "Student Name: ", font = controller.MENU_FONT, bg = MAROON)
+        self.student_name_label.grid(row = 6, column = 0, padx = 10, sticky = "W")
+        self.student_grade_label = tk.Label(self, text = "Student Grade: ", font = controller.MENU_FONT, bg = MAROON)
+        self.student_grade_label.grid(row = 7, column = 0, padx = 10, sticky = "W")
+        self.student_tnum_label = tk.Label(self, text = "Number of textbooks taken out: ", font = controller.MENU_FONT, bg = MAROON)
+        self.student_tnum_label.grid(row = 8, column = 0, padx = 10, sticky = "W")
+
+        back_button = controller.make_back_button(controller = self)
+        back_button.grid(row = 9, column = 0, padx = 10, pady = (115,0), sticky = "W")
 
 class TextbookScanner(tk.Frame): 
     values_set = False
