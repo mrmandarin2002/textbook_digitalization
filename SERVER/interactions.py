@@ -42,8 +42,11 @@ def information_student(args): # student number
 def student_textbooks(args): # student number
     print(get_time()+"Returning textbooks currently held by student: "+args[0])
     conn = Database.create_connection("server.db")
-    for textbook in Database.get_textbooks(conn):
-        print(textbook)
+    textbooks = []
+    for t in Database.get_textbooks(conn):
+        if t[5] == args[0]:
+            textbooks.append(t[1])
+    return "|".join(textbooks)
 
 # checks if a textbook is valid in the database
 def valid_textbook(args): # textbook number
@@ -114,6 +117,7 @@ interact = {"valid_t": valid_textbook,
             "info_t": information_textbook,
             "info_s": information_student,
             "delete_t": delete_textbook,
+            "student_t": student_textbooks,
             "add_t": add_textbook,
             "add_s": add_student,
             "assign_t": assign_textbook,

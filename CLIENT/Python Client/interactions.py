@@ -71,7 +71,11 @@ class Client:
 
     # add a student to the database
     def add_s(self, student_id, student_name, student_deposit):
-        reutnr self.command("add_s", [student_id, student_name, student_deposit])
+        return self.command("add_s", [student_id, student_name, student_deposit])
+
+    # get student textbooks from the database
+    def student_t(self, student_id):
+        return self.command("textbooks_s", [student_id]).split("|")
 
     # textbook id validation method
     def valid_t(self, textbook_id):
