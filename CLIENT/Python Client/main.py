@@ -6,7 +6,7 @@ from tkinter import messagebox
 import time
 
 #import own files
-import interactions, calculations
+import interactions, calculations, window
 from datetime import datetime
 from pynput.keyboard import Key, Listener
 
@@ -14,7 +14,6 @@ MAIN_FONT = "Comic Sans MS"
 MAROON = '#B03060'
 PINK = '#FF00D4'
 NEON_GREEN = '#4DFF4D'
-
 
 class client(tk.Tk):
 
@@ -24,7 +23,7 @@ class client(tk.Tk):
     start = datetime.now()
     previous_time = 0
     version = "teacher"
-    
+
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
 
@@ -55,7 +54,7 @@ class client(tk.Tk):
             self.frames[page_name] = frame
             frame.grid(row = 0, column = 0, sticky = "nswe")
 
-        self.show_frame("TextbookManagement")
+        self.show_frame("Info")
 
     ##for barcode input
     def on_press(self, key):
@@ -145,10 +144,7 @@ class TextbookManagement(tk.Frame):
                 self.clear()
             elif(controller.server.valid_t(controller.last_barcode_string)):
                 if(student_scanned):
-                    pass
-                    ###
-                    #waiting for ability to assign textbooks to students
-                    ###
+                    student_info = controller.server.info_s()
                 else:
                     messagebox.showerror("Error", "You gotta scan in a student's barcode first my dude...")
             else:
@@ -288,13 +284,10 @@ class Info(tk.Frame):
         self.current_barcode_string = controller.barcode_string
         if(controller.server.ping()):
             self.barcode_label.config(text = "Current Barcode: " + str(controller.barcode_string))
-            #if(controller.server.valid_s(controller.barcode_string)):
-             #   print("YES")
-              #  self.barcode_status_label.config(text = "Barcode Type: Student")
-                ###
-                #waiting for powerschool stuff to be completed
-                ###
-            if(controller.server.valid_t(controller.barcode_string)):
+            if(controller.server.valid_s(controller.barcode_string)):
+                student_info = controller.server.info_s(controller.barcode_string)
+                print(student_info)
+            elif(controller.server.valid_t(controller.barcode_string)):
                 textbook_info = controller.server.info_t(controller.barcode_string)
                 print(textbook_info)
                 self.barcode_status_label.config(text = "Barcode Type: Textbook")
@@ -315,7 +308,9 @@ class Info(tk.Frame):
                     self.clear()
             else:
                 messagebox.showerror("Error", "Invalid barcode")
-             
+
+    def add_student(self, controller):
+        self.w = window.add_student_window(self.master, controller)
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -348,9 +343,13 @@ class Info(tk.Frame):
         if(controller.version == "teacher"):
             delete_button = tk.Button(self, text = "Delete Textbook", font = controller.MENU_FONT, command = lambda: self.delete_textbook(controller = controller))
             delete_button.grid(row = 8, column = 0, padx = 10, pady = (20, 0), sticky = "W")    
-            pady_dif_back = 50    
+            pady_dif_back = 110    
+            self.add_s = tk.Button(self, text = "Add student", font = controller.MENU_FONT, command= lambda: self.add_student(controller = controller))
+            self.add_s.grid(row = 9, column = 0, padx = 10, pady = (10,0), sticky = "W")
         back_button = controller.make_back_button(controller = self)
-        back_button.grid(row = 9, column = 0, padx = 10, pady = (142 - pady_dif_back,0), sticky = "W")
+        back_button.grid(row = 10, column = 0, padx = 10, pady = (142 - pady_dif_back,0), sticky = "W")
+
+
 
 if __name__ =='__main__':
     root = client()
@@ -358,3 +357,7 @@ if __name__ =='__main__':
     root.iconbitmap("sphs_icon.ico")
     root.geometry("600x500")
     root.mainloop()
+
+        
+
+

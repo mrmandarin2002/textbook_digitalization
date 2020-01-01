@@ -71,7 +71,7 @@ class Client:
 
     # add a student to the database
     def add_s(self, student_id, student_name, student_deposit):
-        reutnr self.command("add_s", [student_id, student_name, student_deposit])
+        return self.command("add_s", [student_id, student_name, student_deposit])
 
     # textbook id validation method
     def valid_t(self, textbook_id):
