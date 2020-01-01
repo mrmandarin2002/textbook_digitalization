@@ -114,7 +114,6 @@ def assign_textbook(conn, TextbookNumber, StudentNumber):
                     StudentNumber = ?
                 WHERE TextbookId = ?"""
         # execute sql command string with selected textbook as input parameters and close cursor object
-        print(textbook)
         cur.execute(sql, textbook)
         cur.close()
         # commit the changed database
