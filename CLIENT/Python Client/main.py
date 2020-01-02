@@ -150,7 +150,11 @@ class TextbookManagement(tk.Frame):
                 self.student_textbooks = controller.server.student_t(controller.last_barcode_string)
                 self.student_name_label["text"] = "Student Name: " + self.student_info[2]
                 self.barcode_status_label.config(text = "Barcode Type: Student")
-                self.student_tnum_label["text"] = "Textbooks taken out: " + str(len(self.student_textbooks))
+                self.num_of_textbooks = len(self.student_textbooks)
+                if(not self.student_textbooks):
+                    num_of_textbooks = 0
+                print(self.student_textbooks)
+                self.student_tnum_label["text"] = "Textbooks taken out: " + str(self.num_of_textbooks)
 
             elif(controller.server.valid_t(controller.last_barcode_string)):
                 if(student_scanned):
