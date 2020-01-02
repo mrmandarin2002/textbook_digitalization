@@ -76,7 +76,7 @@ class Client:
     # get student textbooks from the database
     def student_t(self, student_id):
         value = self.command("student_t", [student_id]).split("|")
-        if value[0] == '"':
+        if value[0] == "":
             return []
         else:
             return value
