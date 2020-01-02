@@ -75,7 +75,11 @@ class Client:
 
     # get student textbooks from the database
     def student_t(self, student_id):
-        return self.command("student_t", [student_id]).split("|")
+        value = self.command("student_t", [student_id]).split("|")
+        if value[0] == '"':
+            return []
+        else:
+            return value
 
     # textbook id validation method
     def valid_t(self, textbook_id):
