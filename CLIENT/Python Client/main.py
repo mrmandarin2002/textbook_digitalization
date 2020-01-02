@@ -54,7 +54,7 @@ class client(tk.Tk):
             self.frames[page_name] = frame
             frame.grid(row = 0, column = 0, sticky = "nswe")
 
-        self.show_frame("TextbookManagement")
+        self.show_frame("Info")
 
     ##for barcode input
     def on_press(self, key):
@@ -67,9 +67,11 @@ class client(tk.Tk):
                 self.barcode_string = ""
                 exec(self.current_frame_name + ".barcode_scanned(self = self.current_frame, controller=self)")
         else:
-            if(key != Key.enter and key != Key.shift):
-                self.barcode_string = str(key)[1:-1]
+            self.barcode_string = str(key)[1:-1]
+            if(key == Key.shift or key == Key.enter):
+                self.barcode_string = ""
         self.previous_time = total_elapsed  
+        print(self.barcode_string )
 
     def show_frame(self, page_name):
         self.current_frame = self.frames[page_name]
@@ -325,6 +327,14 @@ class TextbookScanner(tk.Frame):
 class Info(tk.Frame):
 
     current_barcode_string = ""
+    current_textbook_title = ""
+    current_textbook_barcode = ""
+    current_textbook_price = ""
+    current_textbook_info = []
+    student_textbooks = []
+    textbook_selected = False
+    textbook_selected_index = 0
+    textbook_list_made = False
 
     def clear(self):
         self.barcode_label.config(text = "Current Barcode: ")
@@ -333,38 +343,73 @@ class Info(tk.Frame):
         self.textbook_condition_label.config(text = "Textbook Condition: ")
         self.textbook_price_label.config(text = "Textbook Price: ")
         self.student_name_label.config(text = "Student Name: ")
+        self.textbook_barcode_label["text"] = "Textbook Barcode"
+        if(self.textbook_list_made):
+            self.textbook_list_made = False
+            self.textbook_list.delete(0, tk.END)
+            self.textbook_list.grid_forget()
+
+    def select_textbook(self, event, controller):
+        self.textbook_selected = True
+        self.textbook_selected_index = int((self.textbook_list.curselection())[0])
+        self.current_textbook_info = controller.server.info_t(self.student_textbooks[self.textbook_selected_index])
+        self.display_textbook_info()
+
+    def display_textbook_info(self):
+        self.textbook_title_label["text"] = "Textbook Title: " + self.current_textbook_info[1]
+        self.textbook_condition_label["text"] = "Textbook Condition: " + calculations.get_textbook_condition_rev(self.current_textbook_info[3])
+        self.textbook_price_label["text"] = "Textbook Price: " + self.current_textbook_info[2]
+        self.textbook_barcode_label["text"] = "Textbook Barcode " + self.current_textbook_info[0]
 
     def barcode_scanned(self, controller):
+        self.textbook_selected = False
         self.current_barcode_string = controller.last_barcode_string
         if(controller.server.ping()):
             if(controller.server.valid_s(self.current_barcode_string)):
                 self.clear()
-                student_info = controller.server.info_s(self.current_barcode_string)
-                self.student_name_label.config(text = "Student Name: " + student_info[2])
+                self.textbook_list_made = True
+                self.student_info = controller.server.info_s(self.current_barcode_string)
+                self.student_textbooks = controller.server.student_t(self.current_barcode_string)
+                self.student_name_label.config(text = "Student Name: " + self.student_info[2])
                 self.barcode_status_label["text"] = "Barcode Type: Student"
+                cnt = 1
+                self.textbook_list = tk.Listbox(self, bd = 0, bg = MAROON, font = controller.MENU_FONT, selectmode = "SINGLE", selectbackground = MAROON)
+                for textbook in self.student_textbooks:
+                    textbook_info = controller.server.info_t(textbook)
+                    self.textbook_list.insert(cnt, textbook_info[1])
+                    cnt += 1
+                self.textbook_list.grid(row = 1, column = 1, sticky = "NW", rowspan = 10)
+                self.textbook_list.bind('<<ListboxSelect>>', lambda event: self.select_textbook(event,controller))
+
             elif(controller.server.valid_t(self.current_barcode_string)):
                 self.clear()
-                textbook_info = controller.server.info_t(self.current_barcode_string)
-                print(textbook_info)
-                self.barcode_status_label.config(text = "Barcode Type: Textbook")
-                self.textbook_title_label.config(text = "Textbook Title: " + textbook_info[1])
-                self.textbook_condition_label.config(text = "Textbook Condition: " + calculations.get_textbook_condition_rev(textbook_info[3]))
-                self.textbook_price_label.config(text = "Textbook Price: " + textbook_info[2])
+                self.barcode_status_label["text"] = "Barcode Type: Textbook" 
+                self.current_textbook_info = controller.server.info_t(self.current_barcode_string)
+                self.display_textbook_info()
             else:
                 messagebox.showerror("Fatal Error", "WTF DID YOU SCAN IN BOI????")
             self.barcode_label.config(text = "Current Barcode: " + str(self.current_barcode_string))
 
     def delete_textbook(self, controller):
         if(controller.server.ping()):
-            if(controller.server.valid_s(self.current_barcode_string)):
-                messagebox.showerror("Error", "You cannot delete students")
-            elif(controller.server.valid_t(self.current_barcode_string)):
-                MsgOption = messagebox.askyesno("Warning!", "Are you sure you would like to delete this textbook?")
-                if(MsgOption == True):
-                    controller.server.delete_t(self.current_barcode_string)
-                    self.clear()
+            if(not self.textbook_selected):
+                if(controller.server.valid_s(self.current_barcode_string)):
+                    messagebox.showerror("Error", "You cannot delete students")
+                elif(controller.server.valid_t(self.current_barcode_string)):
+                    MsgOption = messagebox.askyesno("Warning!", "Are you sure you would like to delete this textbook?")
+                    if(MsgOption == True):
+                        controller.server.return_t(self.current_barcode_string)
+                        controller.server.delete_t(self.current_barcode_string)
+                        self.clear()
+                else:
+                    messagebox.showerror("Error", "Invalid barcode")
             else:
-                messagebox.showerror("Error", "Invalid barcode")
+                option = messagebox.askyesno("Warning", "Would you like to the delete (return) the textbook you selected?")
+                if(option):
+                    controller.server.return_t(self.current_textbook_info[0])
+                    self.textbook_list.delete(self.textbook_selected_index)
+                    self.student_textbooks.remove(self.current_textbook_info[0])
+
 
     def add_student(self, controller):
         self.w = window.add_student_window(self.master, controller)
@@ -378,7 +423,7 @@ class Info(tk.Frame):
         self.barcode_label = tk.Label(self, text = "Current Barcode: ", font = controller.MENU_FONT, bg = MAROON)
         self.barcode_label.grid(row = 0, column = 0, padx = 10, pady = 10, sticky = "W")
         self.barcode_status_label = tk.Label(self, text = "Barcode Type: ", font = controller.MENU_FONT, bg = MAROON)
-        self.barcode_status_label.grid(row = 0, column = 0, padx = 10, pady = (40, 0), sticky = "W")
+        self.barcode_status_label.grid(row = 0, column = 0, padx = 10, pady = (50, 0), sticky = "W")
         
         textbook_info_label = tk.Label(self, text = "Textbook Info", font = controller.SUBTITLE_FONT, bg = MAROON)
         textbook_info_label.grid(row = 1, column = 0, padx = 10, pady = (30, 0),  sticky = "W")
@@ -388,23 +433,29 @@ class Info(tk.Frame):
         self.textbook_condition_label.grid(row = 3, column = 0, padx = 10, sticky = "W")
         self.textbook_price_label = tk.Label(self, text = "Textbook Price: ", font = controller.MENU_FONT, bg = MAROON)
         self.textbook_price_label.grid(row = 4, column = 0, padx = 10, sticky = "W")
+        self.textbook_barcode_label = tk.Label(self, text = "Textbook Barcode: ", font = controller.MENU_FONT, bg = MAROON)
+        self.textbook_barcode_label.grid(row = 5, column = 0, padx = 10, sticky = "W")
 
         student_info_label = tk.Label(self, text = "Student Info", font = controller.SUBTITLE_FONT, bg = MAROON)
-        student_info_label.grid(row = 5, column = 0, padx = 10, pady = (30, 0),  sticky = "W")
+        student_info_label.grid(row = 6, column = 0, padx = 10, pady = (20, 0),  sticky = "W")
         self.student_name_label = tk.Label(self, text = "Student Name: ", font = controller.MENU_FONT, bg = MAROON)
-        self.student_name_label.grid(row = 6, column = 0, padx = 10, sticky = "W")
+        self.student_name_label.grid(row = 7, column = 0, padx = 10, sticky = "W")
         self.student_grade_label = tk.Label(self, text = "Student Grade: ", font = controller.MENU_FONT, bg = MAROON)
-        self.student_grade_label.grid(row = 7, column = 0, padx = 10, sticky = "W")
-
+        self.student_grade_label.grid(row = 8, column = 0, padx = 10, sticky = "W")
+        invisible_label = tk.Label(self, text = "", bg = MAROON)
+        invisible_label.grid(row = 12, padx = 150)
+        student_textbooks_label = tk.Label(self, text = "Student Textbooks: ", font = controller.SUBTITLE_FONT, bg = MAROON)
+        student_textbooks_label.grid(row = 0, column = 1, sticky = "W", pady = (30, 0))
+        
         pady_dif_back = 0
         if(controller.version == "teacher"):
             delete_button = tk.Button(self, text = "Delete Textbook", font = controller.MENU_FONT, command = lambda: self.delete_textbook(controller = controller))
-            delete_button.grid(row = 8, column = 0, padx = 10, pady = (20, 0), sticky = "W")    
+            delete_button.grid(row = 9, column = 0, padx = 10, pady = (20, 0), sticky = "W")    
             pady_dif_back = 110    
             self.add_s = tk.Button(self, text = "Add student", font = controller.MENU_FONT, command= lambda: self.add_student(controller = controller))
-            self.add_s.grid(row = 9, column = 0, padx = 10, pady = (10,0), sticky = "W")
+            self.add_s.grid(row = 10, column = 0, padx = 10, pady = (10,0), sticky = "W")
         back_button = controller.make_back_button(controller = self)
-        back_button.grid(row = 10, column = 0, padx = 10, pady = (142 - pady_dif_back,0), sticky = "W")
+        back_button.grid(row = 11, column = 0, padx = 10, pady = (132 - pady_dif_back,0), sticky = "W")
 
 if __name__ =='__main__':
     root = client()
