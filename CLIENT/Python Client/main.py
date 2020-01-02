@@ -54,7 +54,7 @@ class client(tk.Tk):
             self.frames[page_name] = frame
             frame.grid(row = 0, column = 0, sticky = "nswe")
 
-        self.show_frame("Info")
+        self.show_frame("TextbookManagement")
 
     ##for barcode input
     def on_press(self, key):
@@ -129,19 +129,29 @@ class Menu(tk.Frame):
 class TextbookManagement(tk.Frame):
 
     student_scanned = False
+    day = "D"
+    current_student_barcode = ""
 
     def clear(self):
         self.barcode_label.config(text = "Current Barcode: ")
         self.barcode_status_label.config(text = "Barcode Type: ")
-        self.textbook_title_label.config(text = "Textbook Titile: ")
+        self.textbook_title_label.config(text = "Textbook Title: ")
         self.textbook_condition_label.config(text = "Textbook Condition: ")
         self.textbook_price_label.config(text = "Textbook Price: ")
-        self.student_tnum_label.config(text = "Number of textbooks taken out: ")
-
+        self.student_tnum_label.config(text = "Textbooks taken out: ")
+        self.student_name_label["text"] = "Student Name:"
+ 
     def barcode_scanned(self, controller):
         if(controller.server.ping()):
             if(controller.server.valid_s(controller.last_barcode_string)):
                 self.clear()
+                self.current_student_barcode = ""
+                self.student_info = controller.server.info_s(controller.last_barcode_string)
+                self.student_textbooks = controller.server.student_t(controller.last_barcode_string)
+                self.student_name_label["text"] = "Student Name: " + self.student_info[2]
+                self.barcode_status_label.config(text = "Barcode Type: Student")
+                self.student_tnum_label["text"] = "Textbooks taken out: " + str(len(self.student_textbooks))
+
             elif(controller.server.valid_t(controller.last_barcode_string)):
                 if(student_scanned):
                     student_info = controller.server.info_s()
@@ -149,6 +159,17 @@ class TextbookManagement(tk.Frame):
                     messagebox.showerror("Error", "You gotta scan in a student's barcode first my dude...")
             else:
                 messagebox.showerror("Error", "I don't know what you scanned in my dude")
+            self.barcode_label["text"] = "Current Barcode: " + controller.last_barcode_string
+
+    def switch_mode(self):
+        if(self.day == "D"):
+            self.day = "R"
+            self.mode_label["text"] = "Mode: Return"
+            messagebox.showwarning("Mode Switched!", "Mode has been changed to return mode!")
+        else:
+            self.day = "D"
+            self.mode_label["text"] = "Mode: Distribution"
+            messagebox.showwarning("Mode Switched!", "Mode has been changed to distribution mode")
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -170,16 +191,20 @@ class TextbookManagement(tk.Frame):
         self.textbook_price_label.grid(row = 4, column = 0, padx = 10, sticky = "W")
 
         student_info_label = tk.Label(self, text = "Student Info", font = controller.SUBTITLE_FONT, bg = MAROON)
-        student_info_label.grid(row = 5, column = 0, padx = 10, pady = (30, 0),  sticky = "W")
+        student_info_label.grid(row = 5, column = 0, padx = 10, pady = (20, 0),  sticky = "W")
         self.student_name_label = tk.Label(self, text = "Student Name: ", font = controller.MENU_FONT, bg = MAROON)
         self.student_name_label.grid(row = 6, column = 0, padx = 10, sticky = "W")
         self.student_grade_label = tk.Label(self, text = "Student Grade: ", font = controller.MENU_FONT, bg = MAROON)
         self.student_grade_label.grid(row = 7, column = 0, padx = 10, sticky = "W")
-        self.student_tnum_label = tk.Label(self, text = "Number of textbooks taken out: ", font = controller.MENU_FONT, bg = MAROON)
+        self.student_tnum_label = tk.Label(self, text = "Textbooks taken out: ", font = controller.MENU_FONT, bg = MAROON)
         self.student_tnum_label.grid(row = 8, column = 0, padx = 10, sticky = "W")
 
+        selection_button = tk.Button(self, text = "Switch Mode", font = controller.MENU_FONT, command = lambda : self.switch_mode())
+        selection_button.grid(row = 9, column = 0, padx = 10, pady = (20,0), sticky = "W")
+        self.mode_label = tk.Label(self, text = "Mode: Distribution", font = controller.SUBTITLE_FONT, bg = MAROON)
+        self.mode_label.grid(row = 10, column = 0, padx = 10, sticky = "W")
         back_button = controller.make_back_button(controller = self)
-        back_button.grid(row = 9, column = 0, padx = 10, pady = (115,0), sticky = "W")
+        back_button.grid(row = 11, column = 0, padx = 10, pady = (40,0), sticky = "W")
 
 class TextbookScanner(tk.Frame): 
     values_set = False
@@ -201,6 +226,8 @@ class TextbookScanner(tk.Frame):
                     else:
                         MsgOption = messagebox.askyesno("Textbook already in database!", "Would you like to replace the original values?")
                         if(MsgOption == "yes"):
+                            self.num_scanned += 1
+                            self.textbook_label.config(text = "Number of textbooks scanned: " + str(self.num_scanned))
                             controller.server.delete_t(controller.barcode_string)
                             controller.server.add_t(controller.barcode_string, self.current_title, str(self.current_price), str(self.current_condition))
                 elif(controller.server.valid_s(controller.barcode_string)):
@@ -210,6 +237,8 @@ class TextbookScanner(tk.Frame):
                     self.barcode_label.config(text = "Current Barcode: " + controller.barcode_string)
                     self.textbook_label.config(text = "Number of textbooks scanned: " + str(self.num_scanned))
                     self.current_condition = calculations.get_textbook_condition(self.condition_entry.get())
+                    self.current_title = self.title_entry.get()
+                    print("TITLE: " + self.current_title)
                     controller.server.add_t(controller.barcode_string, self.current_title, str(self.current_price), str(self.current_condition))
         else:
             messagebox.showerror("Error", "Please set the values before scanning in a barcode")
@@ -276,18 +305,20 @@ class Info(tk.Frame):
     def clear(self):
         self.barcode_label.config(text = "Current Barcode: ")
         self.barcode_status_label.config(text = "Barcode Type: ")
-        self.textbook_title_label.config(text = "Textbook Titile: ")
+        self.textbook_title_label.config(text = "Textbook Title: ")
         self.textbook_condition_label.config(text = "Textbook Condition: ")
         self.textbook_price_label.config(text = "Textbook Price: ")
+        self.student_name_label.config(text = "Student Name: ")
 
     def barcode_scanned(self, controller):
         self.current_barcode_string = controller.barcode_string
         if(controller.server.ping()):
-            self.barcode_label.config(text = "Current Barcode: " + str(controller.barcode_string))
             if(controller.server.valid_s(controller.barcode_string)):
+                self.clear()
                 student_info = controller.server.info_s(controller.barcode_string)
-                print(student_info)
+                self.student_name_label.config(text = "Student Name: " + student_info[2])
             elif(controller.server.valid_t(controller.barcode_string)):
+                self.clear()
                 textbook_info = controller.server.info_t(controller.barcode_string)
                 print(textbook_info)
                 self.barcode_status_label.config(text = "Barcode Type: Textbook")
@@ -296,6 +327,7 @@ class Info(tk.Frame):
                 self.textbook_price_label.config(text = "Textbook Price: " + textbook_info[2])
             else:
                 messagebox.showerror("Fatal Error", "WTF DID YOU SCAN IN BOI????")
+            self.barcode_label.config(text = "Current Barcode: " + str(controller.barcode_string))
 
     def delete_textbook(self, controller):
         if(controller.server.ping()):
@@ -348,8 +380,6 @@ class Info(tk.Frame):
             self.add_s.grid(row = 9, column = 0, padx = 10, pady = (10,0), sticky = "W")
         back_button = controller.make_back_button(controller = self)
         back_button.grid(row = 10, column = 0, padx = 10, pady = (142 - pady_dif_back,0), sticky = "W")
-
-
 
 if __name__ =='__main__':
     root = client()
