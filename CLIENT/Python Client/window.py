@@ -53,4 +53,6 @@ class add_student_window(object):
         self.student_deposit_label = Entry(popup, font = controller.MENU_FONT)
         self.student_deposit_label.grid(row = 2, column = 1,  pady = 10, padx = (0,5))
 
+class ask_changed_condition(object):
+    pass
         

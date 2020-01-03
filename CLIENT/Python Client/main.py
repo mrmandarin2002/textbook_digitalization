@@ -54,7 +54,7 @@ class client(tk.Tk):
             self.frames[page_name] = frame
             frame.grid(row = 0, column = 0, sticky = "nswe")
 
-        self.show_frame("Info")
+        self.show_frame("TextbookManagement")
 
     ##for barcode input
     def on_press(self, key):
@@ -132,8 +132,9 @@ class Menu(tk.Frame):
 class TextbookManagement(tk.Frame):
 
     student_scanned = False
-    day = "D"
+    day = 'D'
     current_student_barcode = ""
+    textbook_list_made = False
 
     def clear(self):
         self.barcode_label.config(text = "Current Barcode: ")
@@ -143,6 +144,16 @@ class TextbookManagement(tk.Frame):
         self.textbook_price_label.config(text = "Textbook Price: ")
         self.student_tnum_label.config(text = "Textbooks taken out: ")
         self.student_name_label["text"] = "Student Name:"
+        if(self.textbook_list_made):
+            self.textbook_list_made = False
+            self.textbook_list.delete(0, tk.END)
+            self.textbook_list.grid_forget()
+    
+    def clear_textbooks(self):
+        if(self.textbook_list_made):
+            self.textbook_list_made = False
+            self.textbook_list.delete(0, tk.END)
+            self.textbook_list.grid_forget()
  
     def barcode_scanned(self, controller):
         if(controller.server.ping()):
@@ -160,7 +171,20 @@ class TextbookManagement(tk.Frame):
                 if(self.day == 'D'):
                     pass
                 else:
-                    pass
+                    if(self.num_of_textbooks):
+                        self.textbook_list_made = True
+                        self.student_textbooks = controller.server.student_t(self.current_student_barcode)
+                        cnt = 0
+                        self.textbook_list = tk.Listbox(self, bd = 0, bg = MAROON, font = controller.MENU_FONT, selectmode = "SINGLE", selectbackground = MAROON)
+                        for textbook in self.student_textbooks:
+                            textbook_info = controller.server.info_t(textbook)
+                            self.textbook_list.insert(cnt, textbook_info[1])
+                            cnt += 1
+                        self.textbook_list.grid(row = 1, column = 1, sticky = "NW", rowspan = 10)
+                        self.textbook_list.bind('<<ListboxSelect>>', lambda event: self.select_textbook(event,controller))
+                    else:
+                        messagebox.showerror("ERROR", self.student_info[2] + " has taken out no textbooks")
+
             elif(controller.server.valid_t(controller.last_barcode_string)):
                 self.barcode_status_label["text"] = "Barcode Type: Textbook"
                 textbook_information = controller.server.info_t(controller.last_barcode_string)
@@ -171,6 +195,8 @@ class TextbookManagement(tk.Frame):
                             messagebox.showerror("ERROR", "This textbook is already assigned to this student")
                         elif(textbook_information[4] == "None"):
                             controller.server.assign_t(controller.last_barcode_string, self.current_student_barcode)
+                            self.num_of_textbooks += 1
+                            self.student_tnum_label["text"] = "Textbooks taken out: " + str(self.num_of_textbooks)
                         else:
                             owner_info = controller.server.info_s(textbook_information[4])
                             print(owner_info)
@@ -178,8 +204,26 @@ class TextbookManagement(tk.Frame):
                             if(option):
                                 controller.server.return_t(controller.last_barcode_string)
                                 controller.server.assign_t(controller.last_barcode_string, self.current_student_barcode)
+                                self.num_of_textbooks += 1
+                                self.student_tnum_label["text"] = "Textbooks taken out: " + str(self.num_of_textbooks)
                     else:
-                        pass
+                        if(textbook_information[4] == self.current_student_barcode):
+                            self.num_of_textbooks -= 1
+                            self.student_tnum_label["text"] = "Textbooks taken out: " + str(self.num_of_textbooks)
+                            self.textbook_list.delete(self.student_textbooks.index(controller.last_barcode_string))
+                            self.student_textbooks.remove(controller.last_barcode_string)
+                            controller.server.return_t(controller.last_barcode_string)
+                            ###
+                            #price
+                            #waiting for functions to be complete
+                            ###
+                            if(not self.num_of_textbooks):
+                                messagebox.showwarning("Done!", self.student_info[2] + " is done returning textbooks!")
+                        elif(textbook_information[4] != None):
+                            student_name = (controller.server.info_s(textbook_information[4]))[2]
+                            messagebox.showerror("ERROR", "You are trying to return a textbook that belongs to " + student_name)
+                        else:
+                            messagebox.showerror("ERROR", "This textbook actually belongs to nobody")
                 else:
                     messagebox.showerror("Error", "You gotta scan in a student's barcode first my dude...")
             else:
@@ -187,13 +231,16 @@ class TextbookManagement(tk.Frame):
             self.barcode_label["text"] = "Current Barcode: " + controller.last_barcode_string
 
     def switch_mode(self):
-        if(self.day == "D"):
-            self.day = "R"
+        self.clear_textbooks()
+        if(self.day == 'D'):
+            self.day = 'R'
             self.mode_label["text"] = "Mode: Return"
+            self.student_textbooks_label["text"] = "Student Textbooks: "
             messagebox.showwarning("Mode Switched!", "Mode has been changed to return mode!")
         else:
-            self.day = "D"
+            self.day = 'D'
             self.mode_label["text"] = "Mode: Distribution"
+            self.student_textbooks_label["text"] = "Needed Textbooks: "
             messagebox.showwarning("Mode Switched!", "Mode has been changed to distribution mode")
 
     def __init__(self, parent, controller):
@@ -228,8 +275,12 @@ class TextbookManagement(tk.Frame):
         selection_button.grid(row = 9, column = 0, padx = 10, pady = (20,0), sticky = "W")
         self.mode_label = tk.Label(self, text = "Mode: Distribution", font = controller.SUBTITLE_FONT, bg = MAROON)
         self.mode_label.grid(row = 10, column = 0, padx = 10, sticky = "W")
+        self.student_textbooks_label = tk.Label(self, text = "Needed Textbooks: ", font = controller.SUBTITLE_FONT, bg = MAROON)
+        self.student_textbooks_label.grid(row = 0, column = 1, sticky = "W", pady = (30, 0))
         back_button = controller.make_back_button(controller = self)
         back_button.grid(row = 11, column = 0, padx = 10, pady = (40,0), sticky = "W")
+        invisible_label = tk.Label(self, text = "", bg = MAROON)
+        invisible_label.grid(row = 12, padx = 150)
 
 class TextbookScanner(tk.Frame): 
     values_set = False
@@ -343,7 +394,7 @@ class Info(tk.Frame):
         self.textbook_condition_label.config(text = "Textbook Condition: ")
         self.textbook_price_label.config(text = "Textbook Price: ")
         self.student_name_label.config(text = "Student Name: ")
-        self.textbook_barcode_label["text"] = "Textbook Barcode"
+        self.textbook_barcode_label["text"] = "Textbook Barcode: "
         if(self.textbook_list_made):
             self.textbook_list_made = False
             self.textbook_list.delete(0, tk.END)
@@ -385,6 +436,11 @@ class Info(tk.Frame):
                 self.clear()
                 self.barcode_status_label["text"] = "Barcode Type: Textbook" 
                 self.current_textbook_info = controller.server.info_t(self.current_barcode_string)
+                print(self.current_textbook_info[4])
+                if(self.current_textbook_info[4] != "None"):
+                    self.student_name_label["text"] = "Textbook Owner: " + controller.server.info_s(self.current_textbook_info[4])[2]
+                else:
+                    self.student_name_label["text"] = "Textbook Owner: N/A"
                 self.display_textbook_info()
             else:
                 messagebox.showerror("Fatal Error", "WTF DID YOU SCAN IN BOI????")
