@@ -1,7 +1,7 @@
 Students:
 
 StudentId: int [Primary Key]
-StudentNumber: int required
+StudentNumber: text required
 StudentName: text required
 
 
@@ -9,7 +9,7 @@ StudentName: text required
 Textbooks:
 
 TextbookId: int [Primary Key]
-TextbookNumber: int required
+TextbookNumber: text required
 TextbookTitle: text required
 TextbookCost: real required
 
@@ -18,11 +18,13 @@ TextbookCost: real required
 Withdrawls:
 
 WithdrawlId: int [Primary Key]
-StudentId: required [References Students]
-TextbookId: required [References Textbooks]
+StudentNumber: required [References Students]
+TextbookNumber: required [References Textbooks]
+Over_Summer: int required
 StartCondition: int required
-StartDate: date required
-EndCondition: date required
+StartDate: text required
+EndCondition: int
+EndDate: text
 
 
 
