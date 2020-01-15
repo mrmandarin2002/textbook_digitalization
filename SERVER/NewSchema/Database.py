@@ -1,6 +1,6 @@
 import sqlite3
 from sqlite3 import Error
-import os, shutil
+import os, shutil, xlrd
 
 def reset_database(db_file, db_backup):
     os.remove(db_file)
@@ -19,21 +19,21 @@ def close_connection(conn):
 
 def insert_student(conn, number, name, deposit):
     # create an sql command string
-    sql_cmd = """INSERT INTO Students(StudentNumber, StudentName, StudentDeposit)
-             VALUES(?,?,?)"""
+    sql_cmd = """INSERT INTO Students(StudentNumber, StudentName, StudentDeposit, StudentCourses)
+             VALUES(?,?,?, ?)"""
     # create a cursor object
     cur = conn.cursor()
     # execute the sql command string using the function parameters
-    cur.execute(sql_cmd, (str(number), str(name), float(deposit)))
+    cur.execute(sql_cmd, (str(number), str(name), float(deposit), ""))
     cur.close() # close the cursor object
     # commit the changes to the database
     conn.commit()
     # return the id of the inserted sutdent
     return cur.lastrowid
 
-def remove_student(conn, StudentId):
+def remove_student(conn, StudentNumber):
     # create an sql command string using the function parameter
-    sql_cmd = "DELETE FROM Students WHERE StudentNumber="+str(StudentId)+";"
+    sql_cmd = "DELETE FROM Students WHERE StudentNumber=\""+str(StudentNumber)+"\";"
     # create a cursor object
     cur = conn.cursor()
     # execute the sql command string
@@ -75,7 +75,7 @@ def insert_textbook(conn, number, title, cost, condition):
 
 def remove_textbook(conn, TextbookNumber):
     # create an sql command string using the function parameter
-    sql_cmd = "DELETE FROM Textbooks WHERE TextbookNumber="+str(TextbookNumber)+";"
+    sql_cmd = "DELETE FROM Textbooks WHERE TextbookNumber=\""+str(TextbookNumber)+"\";"
     # create a cursor object
     cur = conn.cursor()
     # execute the sql command string
@@ -118,3 +118,86 @@ def assign_textbook(conn, TextbookNumber, StudentNumber):
         cur.close()
         # commit the changed database
         conn.commit()
+
+def insert_course(conn, CourseNumber, CourseName, CourseTeacher):
+    # create an sql command string
+    sql_cmd = """INSERT INTO Courses(CourseNumber, CourseName, CourseTeacher, CourseTextbooks)
+                 VALUES (?,?,?,?)"""
+    # create a cursor object
+    cur = conn.cursor()
+    # execute the sql command string using the function parameters
+    cur.execute(sql_cmd, (CourseNumber, CourseName, CourseTeacher, ""))
+    # commit the changes to the database
+    conn.commit()
+    # return the id of the inserted course
+    CourseId = cur.lastrowid
+    cur.close()
+    return CourseId
+
+def get_courses(conn):
+    # create a cursor object
+    cur = conn.cursor()
+    # execute an sql command string
+    cur.execute("select * FROM Courses WHERE 1")
+    # return the results of the query
+    result = cur.fetchall()
+    cur.close()
+    return result
+
+# function to import students from enrollment sheet of formated excel document (SampleData.xlsx)
+def import_students(conn, sheets_filename):
+    # open enrollments sheet
+    enrollment = xlrd.open_workbook(sheets_filename).sheet_by_index(0)
+    # insert students into database
+    student_numbers = []
+    for i in range(1, enrollment.nrows):
+        if enrollment.cell_value(i, 0) not in student_numbers:
+            insert_student(conn, str(int(enrollment.cell_value(i, 0))), enrollment.cell_value(i, 2)+" "+enrollment.cell_value(i, 3), "0")
+            student_numbers.append(enrollment.cell_value(i, 0))
+    # add courses to students in database
+    student_courses = {}
+    for i in range(1, enrollment.nrows):
+        if str(int(enrollment.cell_value(i, 0))) in student_courses:
+            student_courses[str(int(enrollment.cell_value(i, 0)))].append(str(enrollment.cell_value(i, 4)).split(".")[0]+"."+str(int(enrollment.cell_value(i, 5))))
+        else:
+            student_courses[str(int(enrollment.cell_value(i, 0)))] = [str(enrollment.cell_value(i, 4)).split(".")[0]+"."+str(int(enrollment.cell_value(i, 5)))]
+    for StudentNumber in student_courses.keys():
+        for s in get_students(conn):
+            if s[1] == StudentNumber:
+                student = list(s)
+                break
+        if student:
+            student[4] = "|".join(student_courses[StudentNumber])
+            student.append(student[0])
+            student = student[1:]
+            cur = conn.cursor()
+            sql_cmd = """UPDATE Students
+                         SET StudentNumber = ? ,
+                             StudentName = ? ,
+                             StudentDeposit = ? ,
+                             StudentCourses = ?
+                         WHERE StudentId = ?"""
+            cur.execute(sql_cmd, student)
+            cur.close()
+            conn.commit()
+
+# function to import courses from enrollments sheet and teachers sheet
+def import_courses(conn, sheets_filename):
+    # open enrollments, courses, and teachers sheets
+    enrollment = xlrd.open_workbook(sheets_filename).sheet_by_index(0)
+    courses = xlrd.open_workbook(sheets_filename).sheet_by_index(1)
+    teachers = xlrd.open_workbook(sheets_filename).sheet_by_index(2)
+    # insert courses into database
+    course_identifiers = []
+    for i in range(1, enrollment.nrows):
+        if str(int(float(enrollment.cell_value(i, 4))))+"."+str(int(float(enrollment.cell_value(i, 5)))) not in course_identifiers:
+            # find teacher name
+            for j in range(1, teachers.nrows):
+                if teachers.cell_value(j, 2) == enrollment.cell_value(i, 6):
+                    teacher_name = teachers.cell_value(j, 0)+" "+teachers.cell_value(j, 1)
+            # find course name
+            for j in range(1, courses.nrows):
+                if courses.cell_value(j, 1) == enrollment.cell_value(i, 4):
+                    course_name = courses.cell_value(j, 0)
+            insert_course(conn, str(int(float(enrollment.cell_value(i, 4))))+"."+str(int(float(enrollment.cell_value(i, 5)))), course_name, teacher_name)
+            course_identifiers.append(str(int(float(enrollment.cell_value(i, 4))))+"."+str(int(float(enrollment.cell_value(i, 5)))))

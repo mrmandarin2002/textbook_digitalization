@@ -1,1 +1,0 @@
-from Database import *; reset_database("server_backup.db", "server.db")

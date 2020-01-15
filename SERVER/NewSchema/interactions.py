@@ -48,6 +48,14 @@ def student_textbooks(args): # student number
             textbooks.append(t[1])
     return "|".join(textbooks)
 
+# get textbooks that a student should have
+def student_requisites(args): # student number
+    print(get_time()+"Returning requisite textbooks for student: "+args[0])
+    conn = Database.create_connection("server.db")
+    courses = []
+    for s in Database.get_students(conn):
+        print(s)
+
 # checks if a textbook is valid in the database
 def valid_textbook(args): # textbook number
     print(get_time()+"Checking if "+args[0]+" is a valid textbook id...")
