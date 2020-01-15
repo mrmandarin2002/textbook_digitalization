@@ -190,7 +190,7 @@ def import_courses(conn, sheets_filename):
     # insert courses into database
     course_identifiers = []
     for i in range(1, enrollment.nrows):
-        if str(int(float(enrollment.cell_value(i, 4))))+"."+str(int(float(enrollment.cell_value(i, 5)))) not in course_identifiers:
+        if str(enrollment.cell_value(i, 4)).split(".")[0]+"."+str(int(float(enrollment.cell_value(i, 5)))) not in course_identifiers:
             # find teacher name
             for j in range(1, teachers.nrows):
                 if teachers.cell_value(j, 2) == enrollment.cell_value(i, 6):
@@ -199,5 +199,5 @@ def import_courses(conn, sheets_filename):
             for j in range(1, courses.nrows):
                 if courses.cell_value(j, 1) == enrollment.cell_value(i, 4):
                     course_name = courses.cell_value(j, 0)
-            insert_course(conn, str(int(float(enrollment.cell_value(i, 4))))+"."+str(int(float(enrollment.cell_value(i, 5)))), course_name, teacher_name)
-            course_identifiers.append(str(int(float(enrollment.cell_value(i, 4))))+"."+str(int(float(enrollment.cell_value(i, 5)))))
+            insert_course(conn, str(enrollment.cell_value(i, 4)).split(".")[0]+"."+str(int(float(enrollment.cell_value(i, 5)))), course_name, teacher_name)
+            course_identifiers.append(str(enrollment.cell_value(i, 4)).split(".")[0]+"."+str(int(float(enrollment.cell_value(i, 5)))))
