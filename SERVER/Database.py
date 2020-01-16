@@ -134,6 +134,17 @@ def insert_course(conn, CourseNumber, CourseName, CourseTeacher):
     cur.close()
     return CourseId
 
+def set_course_requisites(conn, CourseNumber, CourseRequisites):
+    for c in get_courses(conn):
+        if c[1] == CourseNumber:
+            course = c
+    sql_cmd = """UPDATE Courses
+                 SET CourseTextbooks = ?
+                 WHERE CourseId = ?"""
+    cur = conn.cursor()
+    cur.execute(sql_cmd, (CourseRequisites, course[0]))
+    conn.commit()
+
 def get_courses(conn):
     # create a cursor object
     cur = conn.cursor()

@@ -52,9 +52,14 @@ def student_textbooks(args): # student number
 def student_requisites(args): # student number
     print(get_time()+"Returning requisite textbooks for student: "+args[0])
     conn = Database.create_connection("server.db")
-    courses = []
     for s in Database.get_students(conn):
-        print(s)
+        if s[1] == args[0]:
+            courses = s[4].split("|")
+    textbooks = []
+    for c in Database.get_courses(conn):
+        if c[1] in courses:
+            textboks.append(c[4].split("|"))
+    return "|".join(textbooks)
 
 # checks if a textbook is valid in the database
 def valid_textbook(args): # textbook number
@@ -114,6 +119,41 @@ def return_textbook(args):
     conn.close()
     return "1"
 
+# return the requisite textbooks for a given course
+def course_requisites(args):
+    print(get_time()+"Getting course requisites for course: "+args[0])
+    conn = Database.create_connection("server.db")
+    for c in Database.get_courses(conn):
+        if c[1] == args[0]:
+            return c[4]
+
+# return information for a specified course
+def information_course(args):
+    print(get_time()+"Returning information for course: "+args[0])
+    conn = Database.create_connection("server.db")
+    for c in Database.get_courses(conn):
+        if c[1] == args[0]:
+            course = c[1:]
+    for i in range(len(course)):
+        course[i] = str(course[i])
+    return "~".join(course)
+
+# return all course numbers from database
+def course_numbers(args):
+    print(get_time()+"Returning all course numbers...")
+    conn = Database.create_connection("server.db")
+    numbers = []
+    for c in Database.get_courses(conn):
+        numbers.append(c[1])
+    conn.close()
+    return "|".join(numbers)
+
+def set_course_textbooks(args):
+    print(get_time()+"Setting textbooks:\n\t"+"\n\t".join(args[1])+"\nAs requisites to course: "+args[0])
+    conn = Database.create_connection("server.db")
+    Database.set_course_requisites(conn, args[0], args[1])
+    return "1"
+
 # ping (always return 1)
 def ping(args): # no arguments
     print(get_time()+"Received ping...")
@@ -124,10 +164,15 @@ interact = {"valid_t": valid_textbook,
             "valid_s": valid_student,
             "info_t": information_textbook,
             "info_s": information_student,
+            "info_c": information_course,
             "delete_t": delete_textbook,
             "student_t": student_textbooks,
+            "student_r": student_requisites,
+            "set_course_r": set_course_requisites,
             "add_t": add_textbook,
             "add_s": add_student,
+            "courses_n": course_numbers,
+            "course_r": course_requisites,
             "assign_t": assign_textbook,
             "return_t": return_textbook,
             "p": ping}

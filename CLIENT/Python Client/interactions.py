@@ -99,3 +99,19 @@ class Client:
     # retun textbook from student in database
     def return_t(self, textbook_id):
         return self.command("return_t", [textbook_id])
+
+    # get a list of all course numbers
+    def courses_n(self):
+        return self.command("courses_n", []).split("|")
+    
+    # get a list of requisite textbooks for a given course
+    def course_r(self, course_id):
+        return self.command("course_r", [course_id]).split("|")
+
+    # get course information for a given course
+    def info_c(self, course_id):
+        return self.command("info_c", [course_id]).split("~")
+    
+    # sets the requisite textbooks for a course
+    def set_course_r(self, course_id, course_r):
+        return self.command("set_course_r", [course_id, course_r])
