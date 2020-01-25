@@ -18,11 +18,16 @@ NEON_GREEN = '#4DFF4D'
 class client(tk.Tk):
 
     barcode_string = ""
-    last_barcode_string = ""
+    current_barcode = ""
     barcode_scanned = False
     start = datetime.now()
     previous_time = 0
+    scanner_status = True
     version = "teacher"
+    student_info = []
+    student_textbooks = []
+    textbook_info = []
+    barcode_status = ""
 
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -58,24 +63,41 @@ class client(tk.Tk):
 
     ##for barcode input
     def on_press(self, key):
-        total_elapsed = (datetime.now() - self.start).microseconds + (datetime.now() - self.start).seconds * 1000000
-        if(total_elapsed - self.previous_time < 40000):
-            if(key != Key.enter and key != Key.shift):
-                self.barcode_string += str(key)[1:-1]
-            if(key == Key.enter and len(self.barcode_string) > 4):
-                self.last_barcode_string = self.barcode_string
-                self.barcode_string = ""
-                exec(self.current_frame_name + ".barcode_scanned(self = self.current_frame, controller=self)")
-        else:
-            self.barcode_string = str(key)[1:-1]
-            if(key == Key.shift or key == Key.enter):
-                self.barcode_string = ""
-        self.previous_time = total_elapsed  
-        print(self.barcode_string )
+        if(self.scanner_status):
+            total_elapsed = (datetime.now() - self.start).microseconds + (datetime.now() - self.start).seconds * 1000000
+            if(total_elapsed - self.previous_time < 40000):
+                if(key != Key.enter and key != Key.shift):
+                    self.barcode_string += str(key)[1:-1]
+                if(key == Key.enter and len(self.barcode_string) > 4):
+                    self.current_barcode = self.barcode_string
+                    self.barcode_string = ""
+                    exec(self.current_frame_name + ".barcode_scanned(self = self.current_frame, controller=self)")
+                    check_barcode()
+            else:
+                self.barcode_string = str(key)[1:-1]
+                if(key == Key.shift or key == Key.enter):
+                    self.barcode_string = ""
+            self.previous_time = total_elapsed  
+            print(self.barcode_string)
+
+    def check_barcode(self):
+        if(self.server.ping()):
+            if(self.server.valid_s(self.current_barcode)):
+                print("STUDENT BARCODE!")
+                self.student_info = self.server.info_s(self.current_barcode)
+                self.student_textbooks = self.student_t(self.current_barcode)
+                self.barcode_status = "Student"
+            elif(self.server.valid_t(self.current_barcode)):
+                print("TEXTBOOK BARCODE!")
+                self.textbook_info = self.server.info_t(self.current_barcode)
+                self.barcode_status = "Textbook"
+            else:
+                self.barcode_status = "Unknown"      
 
     def show_frame(self, page_name):
         self.current_frame = self.frames[page_name]
         self.current_frame_name = page_name
+        self.scanner_status = True
         exec(self.current_frame_name + ".clear(self = self.current_frame)")
         self.current_frame.tkraise()
 
@@ -95,7 +117,7 @@ class WelcomePage(tk.Frame):
         pass
 
     def barcode_scanned(self, controller):
-        pass
+        controller.scanner_status = False
     
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -113,7 +135,7 @@ class Menu(tk.Frame):
         pass
     
     def barcode_scanned(self, controller):
-        pass
+        controller.scanner_status = False
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -293,30 +315,27 @@ class TextbookScanner(tk.Frame):
         pass
 
     def barcode_scanned(self, controller):
-        self.current_barcode = controller.last_barcode_string
         if(self.values_set):
-            if(controller.server.ping()):
-                if(controller.server.valid_t(self.current_barcode)):
-                    textbook_info = controller.server.info_t(self.current_barcode)
-                    if(textbook_info[1] == self.current_title and float(textbook_info[2]) == self.current_price):
-                        messagebox.showerror("Error", "This textbook has the same values as the set values")                        
-                    else:
-                        MsgOption = messagebox.askyesno("Textbook already in database!", "Would you like to replace the original values?")
-                        if(MsgOption == "yes"):
-                            self.num_scanned += 1
-                            self.textbook_label.config(text = "Number of textbooks scanned: " + str(self.num_scanned))
-                            controller.server.delete_t(self.current_barcode)
-                            controller.server.add_t(self.current_barcode, self.current_title, str(self.current_price), str(self.current_condition))
-                elif(controller.server.valid_s(self.current_barcode)):
-                    messagebox.showwarning("Warning!", "You are scanning in a student's barcode ID!")
-                else:
-                    self.num_scanned += 1
-                    self.barcode_label.config(text = "Current Barcode: " + self.current_barcode)
-                    self.textbook_label.config(text = "Number of textbooks scanned: " + str(self.num_scanned))
-                    self.current_condition = calculations.get_textbook_condition(self.condition_entry.get())
-                    self.current_title = self.title_entry.get()
-                    print("TITLE: " + self.current_title)
-                    controller.server.add_t(self.current_barcode, self.current_title, str(self.current_price), str(self.current_condition))
+            if(controller.barcode_status == "Textbook"):
+                if(controller.textbook_info[1] == self.current_title and float(controller.textbook_info[2]) == self.current_price):
+                    messagebox.showerror("Error", "This textbook has the same values as the set values")                        
+                else: 
+                    MsgOption = messagebox.askyesno("Textbook already in database!", "Would you like to replace the original values?")
+                    if(MsgOption == "yes"):
+                        self.num_scanned += 1
+                        self.textbook_label.config(text = "Number of textbooks scanned: " + str(self.num_scanned))
+                        controller.server.delete_t(controller.current_barcode)
+                        controller.server.add_t(controller.current_barcode, self.current_title, str(self.current_price), str(self.current_condition))
+            elif(controller.barcode_status == "Student"):
+                messagebox.showwarning("Warning!", "You are scanning in a student's barcode ID!")
+            else:
+                self.num_scanned += 1
+                self.barcode_label.config(text = "Current Barcode: " + controller.current_barcode)
+                self.textbook_label.config(text = "Number of textbooks scanned: " + str(self.num_scanned))
+                self.current_condition = calculations.get_textbook_condition(self.condition_entry.get())
+                self.current_title = self.title_entry.get()
+                print("TITLE: " + self.current_title)
+                controller.server.add_t(controller.current_barcode, self.current_title, str(self.current_price), str(self.current_condition))
         else:
             messagebox.showerror("Error", "Please set the values before scanning in a barcode")
 
