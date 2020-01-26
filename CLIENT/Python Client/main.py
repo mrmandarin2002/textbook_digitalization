@@ -320,7 +320,9 @@ class TeacherAssignment(tk.Frame):
         TeacherAssignment.configure(self, background = MAROON)
 
         self.courses = controller.server.courses_n()
+        self.teachers = controller.server.get_teachers()
         print(self.courses)
+        print(self.teachers)
         controller.make_back_button(self).grid(row = 8, column = 0, padx = 10, pady = 10)
 
 class TextbookScanner(tk.Frame): 
