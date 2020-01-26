@@ -133,9 +133,10 @@ def information_course(args):
     conn = Database.create_connection("server.db")
     for c in Database.get_courses(conn):
         if c[1] == args[0]:
-            course = c[1:]
+            course = list(c[1:])
     for i in range(len(course)):
         course[i] = str(course[i])
+    conn.close()
     return "~".join(course)
 
 # return all course numbers from database
@@ -152,7 +153,29 @@ def set_course_textbooks(args):
     print(get_time()+"Setting textbooks:\n\t"+"\n\t".join(args[1])+"\nAs requisites to course: "+args[0])
     conn = Database.create_connection("server.db")
     Database.set_course_requisites(conn, args[0], args[1])
+    conn.close()
     return "1"
+
+def get_teachers(args):
+    print(get_time()+"Getting teacher names and numbers...")
+    conn = Database.create_connection("server.db")
+    teachers = []
+    for course in Database.get_courses(conn):
+        if course[3] not in teachers:
+            teachers.append(course[3])
+    conn.close()
+    return "|".join(teachers)
+
+def get_teacher_courses(args):
+    print(get_time()+"Getting courses of teacher: "+args[0]+"...")
+    conn = Database.create_connection("server.db")
+    courses = []
+    for course in Database.get_courses(conn):
+        print(course)
+        if course[3] == args[0] and course[1] not in courses:
+            courses.append(course[1])
+    conn.close()
+    return "|".join(courses)
 
 # ping (always return 1)
 def ping(args): # no arguments
@@ -168,6 +191,8 @@ interact = {"valid_t": valid_textbook,
             "delete_t": delete_textbook,
             "student_t": student_textbooks,
             "student_r": student_requisites,
+            "get_teachers": get_teachers,
+            "get_teacher_c": get_teacher_courses
             "set_course_r": set_course_textbooks,
             "add_t": add_textbook,
             "add_s": add_student,

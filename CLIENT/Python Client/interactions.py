@@ -103,7 +103,7 @@ class Client:
     # get a list of all course numbers
     def courses_n(self):
         return self.command("courses_n", []).split("|")
-    
+
     # get a list of requisite textbooks for a given course
     def course_r(self, course_id):
         return self.command("course_r", [course_id]).split("|")
@@ -114,4 +114,12 @@ class Client:
     
     # sets the requisite textbooks for a course
     def set_course_r(self, course_id, course_r):
-        return self.command("set_course_r", [course_id, course_r])
+        return self.command("set_course_r", [course_id, "|".join(course_r)])
+    
+    # gets a list of teacher names
+    def get_teachers(self):
+        return self.command("get_teachers", []).split("|")
+    
+    # gets the list of courses for a given teacher
+    def get_teacher_c(self, teacher_name):
+        return self.command("get_teacher_c", [teacher_name]).split("|")
