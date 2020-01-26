@@ -33,7 +33,7 @@ class client(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
 
         self.server = interactions.Client(address = "127.0.0.1", port = 7356)
-        self.scene_list = (WelcomePage, Menu, TextbookManagement, Info, TextbookScanner)
+        self.scene_list = (WelcomePage, Menu, TextbookManagement, Info, TextbookScanner, TeacherAssignment)
 
         #different type of fonts used throughout the program
         self.TITLE_FONT = tkfont.Font(family=MAIN_FONT, size=20, weight="bold")
@@ -59,7 +59,7 @@ class client(tk.Tk):
             self.frames[page_name] = frame
             frame.grid(row = 0, column = 0, sticky = "nswe")
 
-        self.show_frame("TextbookManagement")
+        self.show_frame("TeacherAssignment")
 
     ##for barcode input
     def on_press(self, key):
@@ -146,10 +146,12 @@ class Menu(tk.Frame):
         m_button = controller.make_button(controller = self, d_text = "Textbook Management", scene = "TextbookManagement", option = "menu")
         s_button = controller.make_button(controller = self, d_text = "Textbook Scanner", scene = "TextbookScanner", option = "menu")
         i_button = controller.make_button(controller = self, d_text = "Info Scanner", scene = "Info", option = "menu")
+        t_button = controller.make_button(controller = self, d_text = "Teacher Assignent", scene = "TeacherAssignment", option = "menu")
         menu_title.pack(pady = (100, 0))
         m_button.pack(pady = (50, 0))
         s_button.pack()
         i_button.pack()
+        t_button.pack()
 
 class TextbookManagement(tk.Frame):
 
@@ -303,6 +305,23 @@ class TextbookManagement(tk.Frame):
         back_button.grid(row = 11, column = 0, padx = 10, pady = (40,0), sticky = "W")
         invisible_label = tk.Label(self, text = "", bg = MAROON)
         invisible_label.grid(row = 12, padx = 150)
+
+class TeacherAssignment(tk.Frame):
+
+    def clear(self):
+        pass
+
+    def barcode_scanned(self, controller):
+        pass
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        TeacherAssignment.configure(self, background = MAROON)
+
+        self.courses = controller.server.courses_n()
+        print(self.courses)
+        controller.make_back_button(self).grid(row = 8, column = 0, padx = 10, pady = 10)
 
 class TextbookScanner(tk.Frame): 
     values_set = False
