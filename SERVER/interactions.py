@@ -192,7 +192,7 @@ interact = {"valid_t": valid_textbook,
             "student_t": student_textbooks,
             "student_r": student_requisites,
             "get_teachers": get_teachers,
-            "get_teacher_c": get_teacher_courses
+            "get_teacher_c": get_teacher_courses,
             "set_course_r": set_course_textbooks,
             "add_t": add_textbook,
             "add_s": add_student,
