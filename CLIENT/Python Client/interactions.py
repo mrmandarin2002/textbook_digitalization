@@ -126,4 +126,4 @@ class Client:
     
     # gets a list of textbook titles
     def get_textbook_titles(self):
-        return self.command("get_textbook_titles").split("|")
+        return self.command("get_textbook_titles", []).split("|")
