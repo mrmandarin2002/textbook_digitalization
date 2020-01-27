@@ -28,6 +28,7 @@ class client(tk.Tk):
     student_textbooks = []
     textbook_info = []
     barcode_status = ""
+    textbook_list = []
 
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -69,11 +70,11 @@ class client(tk.Tk):
                 if(key != Key.enter and key != Key.shift):
                     self.barcode_string += str(key)[1:-1]
                 if(key == Key.enter and len(self.barcode_string) > 4):
+                    self.check_barcode()
                     self.current_barcode = self.barcode_string
                     self.barcode_string = ""
                     self.last_barcode_string = self.current_barcode
                     exec(self.current_frame_name + ".barcode_scanned(self = self.current_frame, controller=self)")
-                    self.check_barcode()
             else:
                 self.barcode_string = str(key)[1:-1]
                 if(key == Key.shift or key == Key.enter):
@@ -97,11 +98,13 @@ class client(tk.Tk):
                 self.barcode_status = "Unknown"      
 
     def show_frame(self, page_name):
-        self.current_frame = self.frames[page_name]
-        self.current_frame_name = page_name
-        self.scanner_status = True
-        exec(self.current_frame_name + ".clear(self = self.current_frame)")
-        self.current_frame.tkraise()
+        exec(page_name + ".can_enter(self = self.frames[page_name], controller = self)")
+        if(self.check_requisites):
+            self.scanner_status = True
+            self.current_frame = self.frames[page_name]
+            self.current_frame_name = page_name
+            exec(self.current_frame_name + ".clear(self = self.current_frame)")
+            self.current_frame.tkraise()
 
     #allows the creation of buttons
     def make_button(self, controller, d_text, scene, option):
@@ -115,11 +118,14 @@ class client(tk.Tk):
 
 class WelcomePage(tk.Frame):
 
-    def clear(self):
+    def clear(self, controller):
         pass
 
     def barcode_scanned(self, controller):
         controller.scanner_status = False
+
+    def can_enter(self):
+        controller.check_requisites = True
     
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -132,6 +138,9 @@ class WelcomePage(tk.Frame):
         welcome_button.pack()
         
 class Menu(tk.Frame):
+
+    def can_enter(self, controller):
+        controller.check_requisites = True
 
     def clear(self):
         pass
@@ -161,6 +170,9 @@ class TextbookManagement(tk.Frame):
     day = 'D'
     current_student_barcode = ""
     textbook_list_made = False
+
+    def can_enter(self, controller):
+        controller.check_requisites = True
 
     def clear(self):
         self.barcode_label.config(text = "Current Barcode: ")
@@ -314,6 +326,15 @@ class TeacherAssignment(tk.Frame):
     identical_courses = False
     teacher_courses = []
 
+    def can_enter(self, controller):
+        if(controller.server.ping()):
+            controller.check_requisites = True
+            if(len(controller.textbook_list) == 0):
+                controller.textbook_list = controller.server.get_textbook_titles()
+                print(controller.textbook_list)
+        else:
+            controller.check_requisites = False
+
     def clear(self):
         pass
 
@@ -442,6 +463,9 @@ class TextbookScanner(tk.Frame):
     current_condition = 0
     num_scanned = 0
 
+    def can_enter(self, controller):
+        controller.check_requisites = True
+
     def clear(self):
         pass
 
@@ -536,6 +560,9 @@ class Info(tk.Frame):
     textbook_selected = False
     textbook_selected_index = 0
     textbook_list_made = False
+
+    def can_enter(self, controller):
+        return True
 
     def clear(self):
         self.barcode_label.config(text = "Current Barcode: ")
