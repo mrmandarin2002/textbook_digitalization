@@ -176,6 +176,15 @@ def get_teacher_courses(args):
     conn.close()
     return "|".join(courses)
 
+def get_textbook_names(args):
+    print(get_time()+"Getting a list of textbook names...")
+    conn = Database.create_connection("server.db")
+    textbooks = []
+    for textbook in Database.get_textbooks(conn):
+        if textbook[2] not in textbooks:
+            textbooks.append(textbook)
+    return "|".join(textbooks)
+
 # ping (always return 1)
 def ping(args): # no arguments
     print(get_time()+"Received ping...")
@@ -193,6 +202,7 @@ interact = {"valid_t": valid_textbook,
             "get_teachers": get_teachers,
             "get_teacher_c": get_teacher_courses,
             "set_course_r": set_course_textbooks,
+            "get_textbook_titles": get_textbook_names,
             "add_t": add_textbook,
             "add_s": add_student,
             "courses_n": course_numbers,

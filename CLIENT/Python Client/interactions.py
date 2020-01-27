@@ -123,3 +123,7 @@ class Client:
     # gets the list of courses for a given teacher
     def get_teacher_c(self, teacher_name):
         return self.command("get_teacher_c", [teacher_name]).split("|")
+    
+    # gets a list of textbook titles
+    def get_textbook_titles(self):
+        return self.command("get_textbook_titles").split("|")
