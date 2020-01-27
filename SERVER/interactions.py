@@ -183,6 +183,8 @@ def get_textbook_names(args):
     for textbook in Database.get_textbooks(conn):
         if textbook[2] not in textbooks:
             textbooks.append(textbook)
+    for i in range(textbooks):
+        textbooks[i] = str(textbooks[i])
     return "|".join(textbooks)
 
 # ping (always return 1)
