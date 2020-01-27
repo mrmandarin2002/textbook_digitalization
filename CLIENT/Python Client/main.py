@@ -323,16 +323,19 @@ class TeacherAssignment(tk.Frame):
     def display_teacher_info(self, controller):
         self.course_list.delete(0, tk.END)
         course_check = []
+        self.courses_info = []
         cnt = 0
         for course in self.teacher_courses:
             course_info = controller.server.info_c(course)
             print(course_info)
             if(self.identical_courses):
                 self.course_list.insert(cnt, course_info[1])
+                self.courses_info.append(course_info)
                 cnt += 1
             else:
                 if(course_info[1] not in course_check):
                     self.course_list.insert(cnt, course_info[1])
+                    self.courses_info.append(course_info)
                     course_check.append(course_info[1])
                     cnt += 1
                     
@@ -345,6 +348,21 @@ class TeacherAssignment(tk.Frame):
             self.identical_button["text"] = "Display Identical Courses"
 
     def select_course(self, event, controller):
+        idx = (self.course_list.curselection()[0])
+        self.course_name_label["text"] = "Course Name: " + self.course_list.get(idx)
+        self.course_textbooks.delete(0, tk.END)
+        self.current_course_textbooks = controller.server.course_r(self.courses_info[idx][0])
+        print(self.current_course_textbooks)
+        for textbook in self.current_course_textbooks:
+            pass
+
+    def delete_selected_textbook(self, controller):
+        pass
+
+    def add_textbook(self, controller):
+        window.add_textbook_window(self, controller).show()
+
+    def confirm_changes(self, controller):
         pass
 
     def search_teacher(self, controller):
@@ -389,17 +407,33 @@ class TeacherAssignment(tk.Frame):
         self.search_button = tk.Button(self, text = "Search that I exist", font = controller.BUTTON_FONT, command = lambda: self.search_teacher(controller))
         self.search_button.grid(row = 3, column = 0, pady = 10, columnspan = 2)
         courses_label = tk.Label(self, text = "Courses", font = controller.SUBTITLE_FONT, bg = MAROON)
-        courses_label.grid(row = 4, column = 0, pady = (5,0), columnspan = 2)
+        courses_label.grid(row = 4, column = 0, padx = 10, pady = (5,0), columnspan = 2, sticky = "W")
         self.course_list = tk.Listbox(self, bd = 0, bg = MAROON, font = controller.MENU_FONT, selectmode = "SINGLE", selectbackground = MAROON)
-        self.course_list.grid(row = 5, column = 0, columnspan = 3, padx = 10, pady = 5)
+        self.course_list.grid(row = 5, column = 0, columnspan = 3, padx = 10, pady = 5, sticky = "W")
         self.identical_button = tk.Button(self, text = "Display Identical Courses", font = controller.BUTTON_FONT, command = lambda: self.display_identical_courses(controller))
-        self.identical_button.grid(row = 6, column = 0, columnspan = 3, padx = 10, pady = 2)
+        self.identical_button.grid(row = 6, column = 0, columnspan = 3, padx = 10, pady = 2, sticky = "W")
         self.course_list.bind('<<ListboxSelect>>', lambda event: self.select_course(event,controller))
         self.invisible_label = tk.Label(self, text = "", bg = MAROON)
         self.invisible_label.grid(row = 0, column = 4, padx = 30)
         self.course_info_label = tk.Label(self, text = "Course Info:", font = controller.SUBTITLE_FONT, bg = MAROON)
-        self.course_info_label.grid(row = 0, column = 5, padx = 10, pady = 10, columnspan = 3)
-        
+        self.course_info_label.grid(row = 0, column = 5, pady = (10,0), columnspan = 3, sticky = "W")
+        self.course_name_label = tk.Label(self, text = "Course Name: ", font = controller.MENU_FONT, bg = MAROON)
+        self.course_name_label.grid(row = 1, column = 5, sticky = "W", columnspan = 2)
+        self.course_section_label = tk.Label(self, text = "Course Section: ", font = controller.MENU_FONT, bg = MAROON)
+        self.course_section_label.grid(row = 2, column = 5, sticky = "W")
+        self.course_textbook_label = tk.Label(self, text = "Course Textbooks:", font = controller.SUBTITLE_FONT, bg = MAROON)
+        self.course_textbook_label.grid(row = 4, column = 5, sticky = "W")
+        self.course_textbooks = tk.Listbox(self, bd = 0, bg = MAROON, font = controller.MENU_FONT, selectmode = "SINGLE", selectbackground = MAROON)
+        self.course_textbooks.grid(row = 5, column = 5, pady = 5, sticky = "NW")
+        self.button_container = tk.Frame(self)
+        self.button_container["bg"] = MAROON
+        self.button_container.grid(row = 5, column = 6, rowspan = 3, pady = 5, sticky = "NW")
+        self.remove_textbook_button = tk.Button(self.button_container, text = "Remove Textbook", font = controller.BUTTON_FONT, command = lambda : self.delete_selected_textbook(controller))
+        self.remove_textbook_button.grid(row = 0, column = 0, padx = 6, sticky = "N")
+        self.add_textbook_button = tk.Button(self.button_container, text = "Add Textbook", font = controller.BUTTON_FONT, command = lambda : self.add_textbook(controller))
+        self.add_textbook_button.grid(row = 1, column = 0,  padx = 6, sticky = "W")
+        self.confirm_button = tk.Button(self, text = "Confirm Changes", font = controller.BUTTON_FONT, command = lambda : self.confirm_changes(controller))
+        self.confirm_button.grid(row = 6, column = 5, sticky = "W")
 
 class TextbookScanner(tk.Frame): 
     values_set = False
