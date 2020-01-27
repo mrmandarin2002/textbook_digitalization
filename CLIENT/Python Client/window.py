@@ -1,4 +1,5 @@
 from tkinter import *
+import tkinter as tk
 from tkinter import font as tkfont
 from tkinter import messagebox
 import sys
@@ -53,6 +54,34 @@ class add_student_window(object):
         self.student_deposit_label = Entry(popup, font = controller.MENU_FONT)
         self.student_deposit_label.grid(row = 2, column = 1,  pady = 10, padx = (0,5))
 
-class ask_changed_condition(object):
-    pass
+class add_textbook_window(tk.Toplevel):
+
+    def search_textbook(self, controller):
+        self.entered_textbook = textbook_entry.get()
+
+    def __init__(self, parent, controller):
+        tk.Toplevel.__init__(self, parent)
+        self.configure(background = main.MAROON)
+        self.title("Add Textbook")
+        self.iconbitmap("sphs_icon.ico")
+        self.textbook_name = tk.StringVar()
+        title_label = tk.Label(self, text = "Enter the name of the textbook:", font = controller.MENU_FONT, bg = main.MAROON)
+        title_label.grid(row = 0, column = 0,padx = 5, pady = 5)
+        self.textbook_entry = tk.Entry(self)
+        self.textbook_entry.grid(row = 1, column = 0, padx = 5, pady = 5)
+        textbook_button = tk.Button(self, text = "Search textbook", font = controller.BUTTON_FONT, command = lambda : self.search_textbook(controller))
+        textbook_button.grid(row = 2, column = 0, padx = 5, pady = 5)
+        pot_textbook_label = tk.Label(self, text = "Potential Textbooks:", font = controller.MENU_FONT, bg = main.MAROON)
+        pot_textbook_label.grid(row = 3, column = 0, padx = 5, pady = (10, 0))
+        self.textbook_list = tk.Listbox(self, bd = 0, bg = main.MAROON, font = controller.MENU_FONT, selectmode = "SINGLE", selectbackground = main.MAROON)
+        self.textbook_list.grid(row = 4, column = 0, padx = 5, pady = (0, 10))
+        confirm_button = tk.Button(self, text = "Add Textbook", font = controller.BUTTON_FONT, command = self.death)
+        confirm_button.grid(row = 5, column = 0, padx = 5, pady = (0, 10))
+
+    def death(self, event=None):
+        self.destroy()    
+
+    def show(self):
+        self.wait_window()
+        return self.textbook_name.get()
         

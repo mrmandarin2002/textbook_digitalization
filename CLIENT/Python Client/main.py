@@ -71,22 +71,24 @@ class client(tk.Tk):
                 if(key == Key.enter and len(self.barcode_string) > 4):
                     self.current_barcode = self.barcode_string
                     self.barcode_string = ""
+                    self.last_barcode_string = self.current_barcode
                     exec(self.current_frame_name + ".barcode_scanned(self = self.current_frame, controller=self)")
-                    check_barcode()
+                    self.check_barcode()
             else:
                 self.barcode_string = str(key)[1:-1]
                 if(key == Key.shift or key == Key.enter):
                     self.barcode_string = ""
             self.previous_time = total_elapsed  
-            print(self.barcode_string)
+            #print(self.barcode_string)
 
     def check_barcode(self):
         if(self.server.ping()):
             if(self.server.valid_s(self.current_barcode)):
                 print("STUDENT BARCODE!")
                 self.student_info = self.server.info_s(self.current_barcode)
-                self.student_textbooks = self.student_t(self.current_barcode)
+                self.student_textbooks = self.server.student_t(self.current_barcode)
                 self.barcode_status = "Student"
+                print(self.student_info)
             elif(self.server.valid_t(self.current_barcode)):
                 print("TEXTBOOK BARCODE!")
                 self.textbook_info = self.server.info_t(self.current_barcode)
@@ -308,11 +310,80 @@ class TextbookManagement(tk.Frame):
 
 class TeacherAssignment(tk.Frame):
 
+    current_teacher = ""
+    identical_courses = False
+    teacher_courses = []
+
     def clear(self):
         pass
 
     def barcode_scanned(self, controller):
         pass
+
+    def display_teacher_info(self, controller):
+        self.course_list.delete(0, tk.END)
+        course_check = []
+        self.courses_info = []
+        cnt = 0
+        for course in self.teacher_courses:
+            course_info = controller.server.info_c(course)
+            print(course_info)
+            if(self.identical_courses):
+                self.course_list.insert(cnt, course_info[1])
+                self.courses_info.append(course_info)
+                cnt += 1
+            else:
+                if(course_info[1] not in course_check):
+                    self.course_list.insert(cnt, course_info[1])
+                    self.courses_info.append(course_info)
+                    course_check.append(course_info[1])
+                    cnt += 1
+                    
+    def display_identical_courses(self,controller):
+        self.identical_courses = not self.identical_courses
+        self.display_teacher_info(controller)
+        if(self.identical_courses):
+            self.identical_button["text"] = "Revert"
+        else:
+            self.identical_button["text"] = "Display Identical Courses"
+
+    def select_course(self, event, controller):
+        idx = (self.course_list.curselection()[0])
+        self.course_name_label["text"] = "Course Name: " + self.course_list.get(idx)
+        self.course_textbooks.delete(0, tk.END)
+        self.current_course_textbooks = controller.server.course_r(self.courses_info[idx][0])
+        print(self.current_course_textbooks)
+        for textbook in self.current_course_textbooks:
+            pass
+
+    def delete_selected_textbook(self, controller):
+        pass
+
+    def add_textbook(self, controller):
+        window.add_textbook_window(self, controller).show()
+
+    def confirm_changes(self, controller):
+        pass
+
+    def search_teacher(self, controller):
+        check = False
+        first_name = self.first_name_entry.get()
+        last_name = self.last_name_entry.get()
+        if(first_name and last_name):
+            for t_name in self.teachers:
+                if(first_name.lower() in t_name.lower() and last_name.lower() in t_name.lower()):
+                    confirm = messagebox.askyesno(title = "Confirm", message = "Are you " + t_name + "?")
+                    if(confirm):
+                        check = True
+                        self.current_teacher = t_name
+                        self.teacher_courses = controller.server.get_teacher_c(self.current_teacher)
+                        print("TEACHER COURSES: ", self.teacher_courses)
+                        self.display_teacher_info(controller)
+                        break
+                    else:
+                        messagebox.showinfo("YOU ARE WHO YOU ARE", "NANI?!?")
+        if(not check):
+            messagebox.showerror(title = "Error", message = "YOU ARE NOBODY")
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -320,8 +391,49 @@ class TeacherAssignment(tk.Frame):
         TeacherAssignment.configure(self, background = MAROON)
 
         self.courses = controller.server.courses_n()
-        print(self.courses)
-        controller.make_back_button(self).grid(row = 8, column = 0, padx = 10, pady = 10)
+        self.teachers = controller.server.get_teachers()
+        controller.make_back_button(self).grid(row = 8, column = 0, padx = 10, pady = (15,0))
+        self.first_name_entry = tk.Entry(self)
+        self.last_name_entry = tk.Entry(self)
+        teacher_name_label = tk.Label(self, text = "Who art thee?", font = controller.SUBTITLE_FONT, bg = MAROON)
+        teacher_name_label.grid(row = 0, column = 0, padx = 10, pady = 10, columnspan = 2)
+        first_name_label = tk.Label(self, text = "First Name:", font = controller.MENU_FONT, bg = MAROON)
+        last_name_label = tk.Label(self, text = "Last Name:", font = controller.MENU_FONT, bg = MAROON)
+        first_name_label.grid(row = 1, column = 0)
+        last_name_label.grid(row = 2, column = 0)
+        self.first_name_entry.grid(row = 1, column = 1)
+        self.last_name_entry.grid(row = 2, column = 1)
+
+        self.search_button = tk.Button(self, text = "Search that I exist", font = controller.BUTTON_FONT, command = lambda: self.search_teacher(controller))
+        self.search_button.grid(row = 3, column = 0, pady = 10, columnspan = 2)
+        courses_label = tk.Label(self, text = "Courses", font = controller.SUBTITLE_FONT, bg = MAROON)
+        courses_label.grid(row = 4, column = 0, padx = 10, pady = (5,0), columnspan = 2, sticky = "W")
+        self.course_list = tk.Listbox(self, bd = 0, bg = MAROON, font = controller.MENU_FONT, selectmode = "SINGLE", selectbackground = MAROON)
+        self.course_list.grid(row = 5, column = 0, columnspan = 3, padx = 10, pady = 5, sticky = "W")
+        self.identical_button = tk.Button(self, text = "Display Identical Courses", font = controller.BUTTON_FONT, command = lambda: self.display_identical_courses(controller))
+        self.identical_button.grid(row = 6, column = 0, columnspan = 3, padx = 10, pady = 2, sticky = "W")
+        self.course_list.bind('<<ListboxSelect>>', lambda event: self.select_course(event,controller))
+        self.invisible_label = tk.Label(self, text = "", bg = MAROON)
+        self.invisible_label.grid(row = 0, column = 4, padx = 30)
+        self.course_info_label = tk.Label(self, text = "Course Info:", font = controller.SUBTITLE_FONT, bg = MAROON)
+        self.course_info_label.grid(row = 0, column = 5, pady = (10,0), columnspan = 3, sticky = "W")
+        self.course_name_label = tk.Label(self, text = "Course Name: ", font = controller.MENU_FONT, bg = MAROON)
+        self.course_name_label.grid(row = 1, column = 5, sticky = "W", columnspan = 2)
+        self.course_section_label = tk.Label(self, text = "Course Section: ", font = controller.MENU_FONT, bg = MAROON)
+        self.course_section_label.grid(row = 2, column = 5, sticky = "W")
+        self.course_textbook_label = tk.Label(self, text = "Course Textbooks:", font = controller.SUBTITLE_FONT, bg = MAROON)
+        self.course_textbook_label.grid(row = 4, column = 5, sticky = "W")
+        self.course_textbooks = tk.Listbox(self, bd = 0, bg = MAROON, font = controller.MENU_FONT, selectmode = "SINGLE", selectbackground = MAROON)
+        self.course_textbooks.grid(row = 5, column = 5, pady = 5, sticky = "NW")
+        self.button_container = tk.Frame(self)
+        self.button_container["bg"] = MAROON
+        self.button_container.grid(row = 5, column = 6, rowspan = 3, pady = 5, sticky = "NW")
+        self.remove_textbook_button = tk.Button(self.button_container, text = "Remove Textbook", font = controller.BUTTON_FONT, command = lambda : self.delete_selected_textbook(controller))
+        self.remove_textbook_button.grid(row = 0, column = 0, padx = 6, sticky = "N")
+        self.add_textbook_button = tk.Button(self.button_container, text = "Add Textbook", font = controller.BUTTON_FONT, command = lambda : self.add_textbook(controller))
+        self.add_textbook_button.grid(row = 1, column = 0,  padx = 6, sticky = "W")
+        self.confirm_button = tk.Button(self, text = "Confirm Changes", font = controller.BUTTON_FONT, command = lambda : self.confirm_changes(controller))
+        self.confirm_button.grid(row = 6, column = 5, sticky = "W")
 
 class TextbookScanner(tk.Frame): 
     values_set = False
@@ -559,5 +671,6 @@ if __name__ =='__main__':
     root.mainloop()
 
         
+
 
 
