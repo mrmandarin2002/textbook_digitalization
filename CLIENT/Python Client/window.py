@@ -58,6 +58,7 @@ class add_textbook_window(tk.Toplevel):
 
     def search_textbook(self, controller):
         self.entered_textbook = textbook_entry.get()
+        
 
     def __init__(self, parent, controller):
         tk.Toplevel.__init__(self, parent)
