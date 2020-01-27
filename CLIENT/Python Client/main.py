@@ -344,6 +344,9 @@ class TeacherAssignment(tk.Frame):
         else:
             self.identical_button["text"] = "Display Identical Courses"
 
+    def select_course(self, event, controller):
+        pass
+
     def search_teacher(self, controller):
         check = False
         first_name = self.first_name_entry.get()
@@ -391,7 +394,12 @@ class TeacherAssignment(tk.Frame):
         self.course_list.grid(row = 5, column = 0, columnspan = 3, padx = 10, pady = 5)
         self.identical_button = tk.Button(self, text = "Display Identical Courses", font = controller.BUTTON_FONT, command = lambda: self.display_identical_courses(controller))
         self.identical_button.grid(row = 6, column = 0, columnspan = 3, padx = 10, pady = 2)
-        #self.course_info_label
+        self.course_list.bind('<<ListboxSelect>>', lambda event: self.select_course(event,controller))
+        self.invisible_label = tk.Label(self, text = "", bg = MAROON)
+        self.invisible_label.grid(row = 0, column = 4, padx = 30)
+        self.course_info_label = tk.Label(self, text = "Course Info:", font = controller.SUBTITLE_FONT, bg = MAROON)
+        self.course_info_label.grid(row = 0, column = 5, padx = 10, pady = 10, columnspan = 3)
+        
 
 class TextbookScanner(tk.Frame): 
     values_set = False
