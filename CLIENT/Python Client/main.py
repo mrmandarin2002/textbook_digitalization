@@ -70,11 +70,11 @@ class client(tk.Tk):
                 if(key != Key.enter and key != Key.shift):
                     self.barcode_string += str(key)[1:-1]
                 if(key == Key.enter and len(self.barcode_string) > 4):
+                    self.check_barcode()
                     self.current_barcode = self.barcode_string
                     self.barcode_string = ""
                     self.last_barcode_string = self.current_barcode
                     exec(self.current_frame_name + ".barcode_scanned(self = self.current_frame, controller=self)")
-                    self.check_barcode()
             else:
                 self.barcode_string = str(key)[1:-1]
                 if(key == Key.shift or key == Key.enter):
