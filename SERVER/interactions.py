@@ -171,7 +171,6 @@ def get_teacher_courses(args):
     conn = Database.create_connection("server.db")
     courses = []
     for course in Database.get_courses(conn):
-        print(course)
         if course[3] == args[0] and course[1] not in courses:
             courses.append(course[1])
     conn.close()
