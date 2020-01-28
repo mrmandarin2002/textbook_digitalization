@@ -182,11 +182,7 @@ def get_textbook_names(args):
     textbooks = []
     for textbook in Database.get_textbooks(conn):
         if textbook[2] not in textbooks:
-<<<<<<< HEAD
-            textbooks.append(textbook)
-=======
             textbooks.append(textbook[2])
->>>>>>> 7d61590b1d5cbd77fffee16b1d884d2845ce28b2
     for i in range(len(textbooks)):
         textbooks[i] = str(textbooks[i])
     return "|".join(textbooks)
