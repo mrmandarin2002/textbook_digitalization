@@ -88,6 +88,15 @@ class client(tk.Tk):
                 print("STUDENT BARCODE!")
                 self.student_info = self.server.info_s(self.current_barcode)
                 self.student_textbooks = self.server.student_t(self.current_barcode)
+                self.student_needed_textbooks = []
+                self.student_courses = []
+                for x in range(4, len(self.student_info)):
+                    course_info = self.server.info_c(self.student_info[x])
+                    self.student_courses.append(course_info)
+                    for y in range(3, len(course_info)):
+                        if(len(course_info[y]) > 0):
+                            self.student_needed_textbooks.append(course_info[y])
+                    print(course_info)
                 self.barcode_status = "Student"
                 print(self.student_info)
             elif(self.server.valid_t(self.current_barcode)):
@@ -206,20 +215,22 @@ class TextbookManagement(tk.Frame):
                 self.num_of_textbooks = len(self.student_textbooks)
                 print(self.student_textbooks)
                 self.student_tnum_label["text"] = "Textbooks taken out: " + str(self.num_of_textbooks)
+                self.textbook_list.delete(0, tk.END)
                 if(self.day == 'D'):
-                    pass
+                    print(controller.student_info)
+                    cnt = 0
+                    for textbook in controller.student_needed_textbooks:
+                        self.textbook_list.insert(cnt, textbook)
+                        cnt += 1
                 else:
                     if(self.num_of_textbooks):
                         self.textbook_list_made = True
                         self.student_textbooks = controller.server.student_t(self.current_student_barcode)
                         cnt = 0
-                        self.textbook_list = tk.Listbox(self, bd = 0, bg = MAROON, font = controller.MENU_FONT, selectmode = "SINGLE", selectbackground = MAROON)
                         for textbook in self.student_textbooks:
                             textbook_info = controller.server.info_t(textbook)
                             self.textbook_list.insert(cnt, textbook_info[1])
                             cnt += 1
-                        self.textbook_list.grid(row = 1, column = 1, sticky = "NW", rowspan = 10)
-                        self.textbook_list.bind('<<ListboxSelect>>', lambda event: self.select_textbook(event,controller))
                     else:
                         messagebox.showerror("ERROR", self.student_info[2] + " has taken out no textbooks")
 
@@ -319,19 +330,27 @@ class TextbookManagement(tk.Frame):
         back_button.grid(row = 11, column = 0, padx = 10, pady = (40,0), sticky = "W")
         invisible_label = tk.Label(self, text = "", bg = MAROON)
         invisible_label.grid(row = 12, padx = 150)
+        self.textbook_list = tk.Listbox(self, bd = 0, bg = MAROON, font = controller.MENU_FONT, selectmode = "SINGLE", selectbackground = MAROON)
+        self.textbook_list.grid(row = 1, column = 1, sticky = "NW", rowspan = 10)
+        self.textbook_list.bind('<<ListboxSelect>>', lambda event: self.select_textbook(event,controller))
 
 class TeacherAssignment(tk.Frame):
 
     idx = -1
+    cidx = -1
     current_teacher = ""
     course_selected = False
     teacher_selected = False
     identical_courses = False
     teacher_courses = []
+    courses_info = []
+    full_courses_info = []
     textbook_nums = 0
     current_textbook_list = []
     disable_lambda1 = False
     disable_lambda2 = False
+    changes_made = False
+    new_course = False
 
     def can_enter(self, controller):
         if(controller.server.ping()):
@@ -350,7 +369,8 @@ class TeacherAssignment(tk.Frame):
     def display_teacher_info(self, controller):
         self.course_list.delete(0, tk.END)
         course_check = []
-        self.courses_info = []
+        self.courses_info.clear()
+        self.full_courses_info.clear()
         cnt = 0
         for course in self.teacher_courses:
             course_info = controller.server.info_c(course)
@@ -365,6 +385,7 @@ class TeacherAssignment(tk.Frame):
                     self.courses_info.append(course_info)
                     course_check.append(course_info[1])
                     cnt += 1
+            self.full_courses_info.append(course_info)
                     
     def display_identical_courses(self,controller):
         self.identical_courses = not self.identical_courses
@@ -376,19 +397,25 @@ class TeacherAssignment(tk.Frame):
 
     def select_course(self, event, controller):
         if(self.course_list.curselection()):
-            self.course_selected = True
-            self.cidx = (self.course_list.curselection()[0])
-            self.course_name_label["text"] = "Course Name: " + self.course_list.get(self.cidx)
-            self.course_textbooks.delete(0, tk.END)
-            self.current_course_textbooks = controller.server.course_r(self.courses_info[self.cidx][0])
-            print(self.current_course_textbooks)
-            self.textbook_nums = 0
-            self.current_textbook_list.clear()
-            for textbook in self.current_course_textbooks:
-                if(len(textbook) > 0):
-                    self.course_textbooks.insert(self.textbook_nums, textbook)
-                    self.textbook_nums += 1
-                    self.current_textbook_list.append(textbook)
+            check = True
+            if(self.changes_made and self.course_list.curselection()[0] != self.cidx):
+                check = messagebox.askyesno("Changes", "You've made changes to this course's textbooks, are you sure you want to discard them?")
+            if(check and self.course_list.curselection()[0] != self.cidx or self.new_course):
+                self.new_course = False
+                self.changes_made = False
+                self.course_selected = True
+                self.cidx = (self.course_list.curselection()[0])
+                self.course_name_label["text"] = "Course Name: " + self.course_list.get(self.cidx)
+                self.course_textbooks.delete(0, tk.END)
+                self.current_course_textbooks = controller.server.course_r(self.courses_info[self.cidx][0])
+                print(self.current_course_textbooks)
+                self.textbook_nums = 0
+                self.current_textbook_list.clear()
+                for textbook in self.current_course_textbooks:
+                    if(len(textbook) > 0):
+                        self.course_textbooks.insert(self.textbook_nums, textbook)
+                        self.textbook_nums += 1
+                        self.current_textbook_list.append(textbook)
 
 
     def select_textbook(self, event, controller):
@@ -400,6 +427,7 @@ class TeacherAssignment(tk.Frame):
             del self.current_textbook_list[self.idx]
             self.course_textbooks.delete(self.idx)
             self.textbook_nums -= 1
+            self.changes_made = True
         else:
             messagebox.showerror("ERROR", "Please select a textbook you would like to delete")
 
@@ -417,13 +445,22 @@ class TeacherAssignment(tk.Frame):
             if(current_textbook_name in self.current_textbook_list):
                 messagebox.showwarning("WARNING", "You already have the identical textbook for this course")
             elif(len(current_textbook_name) > 0):
+                self.changes_made = True
                 self.course_textbooks.insert(self.textbook_nums, current_textbook_name)
                 self.current_textbook_list.append(current_textbook_name)
 
     def confirm_changes(self, controller):
+        self.changes_made = False
+        self.new_course = True
         print(self.current_textbook_list)
         print(self.cidx)
-        controller.server.set_course_r(self.teacher_courses[self.cidx], self.current_textbook_list)
+        if(self.identical_courses):
+            controller.server.set_course_r(self.teacher_courses[self.cidx], self.current_textbook_list)
+        else:
+            for course in self.full_courses_info:
+                if(course[1] == self.courses_info[self.cidx][1]):
+                    controller.server.set_course_r(course[0], self.current_textbook_list)
+
 
     def search_teacher(self, controller):
         check = False
