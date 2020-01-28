@@ -70,10 +70,10 @@ class client(tk.Tk):
                 if(key != Key.enter and key != Key.shift):
                     self.barcode_string += str(key)[1:-1]
                 if(key == Key.enter and len(self.barcode_string) > 4):
-                    self.check_barcode()
                     self.current_barcode = self.barcode_string
                     self.barcode_string = ""
                     self.last_barcode_string = self.current_barcode
+                    self.check_barcode()
                     exec(self.current_frame_name + ".barcode_scanned(self = self.current_frame, controller=self)")
             else:
                 self.barcode_string = str(key)[1:-1]
@@ -322,16 +322,22 @@ class TextbookManagement(tk.Frame):
 
 class TeacherAssignment(tk.Frame):
 
+    idx = -1
     current_teacher = ""
+    course_selected = False
+    teacher_selected = False
     identical_courses = False
     teacher_courses = []
+    textbook_nums = 0
+    current_textbook_list = []
+    disable_lambda1 = False
+    disable_lambda2 = False
 
     def can_enter(self, controller):
         if(controller.server.ping()):
             controller.check_requisites = True
-            if(len(controller.textbook_list) == 0):
-                controller.textbook_list = controller.server.get_textbook_titles()
-                print(controller.textbook_list)
+            controller.textbook_list = controller.server.get_textbook_titles()
+            print(controller.textbook_list)
         else:
             controller.check_requisites = False
 
@@ -369,22 +375,55 @@ class TeacherAssignment(tk.Frame):
             self.identical_button["text"] = "Display Identical Courses"
 
     def select_course(self, event, controller):
-        idx = (self.course_list.curselection()[0])
-        self.course_name_label["text"] = "Course Name: " + self.course_list.get(idx)
-        self.course_textbooks.delete(0, tk.END)
-        self.current_course_textbooks = controller.server.course_r(self.courses_info[idx][0])
-        print(self.current_course_textbooks)
-        for textbook in self.current_course_textbooks:
-            pass
+        if(self.course_list.curselection()):
+            self.course_selected = True
+            self.cidx = (self.course_list.curselection()[0])
+            self.course_name_label["text"] = "Course Name: " + self.course_list.get(self.cidx)
+            self.course_textbooks.delete(0, tk.END)
+            self.current_course_textbooks = controller.server.course_r(self.courses_info[self.cidx][0])
+            print(self.current_course_textbooks)
+            self.textbook_nums = 0
+            self.current_textbook_list.clear()
+            for textbook in self.current_course_textbooks:
+                if(len(textbook) > 0):
+                    self.course_textbooks.insert(self.textbook_nums, textbook)
+                    self.textbook_nums += 1
+                    self.current_textbook_list.append(textbook)
+
+
+    def select_textbook(self, event, controller):
+        if(self.course_textbooks.curselection()):
+            self.idx = (self.course_textbooks.curselection()[0])
 
     def delete_selected_textbook(self, controller):
-        pass
+        if(self.idx > -1):
+            del self.current_textbook_list[self.idx]
+            self.course_textbooks.delete(self.idx)
+            self.textbook_nums -= 1
+        else:
+            messagebox.showerror("ERROR", "Please select a textbook you would like to delete")
 
     def add_textbook(self, controller):
-        window.add_textbook_window(self, controller).show()
+        if(not self.teacher_selected):
+            messagebox.showerror("Error", "Please let my poor program know who you are before you click fancy buttons -Derek")
+        elif(not self.course_selected):
+            messagebox.showerror("Error", "Please select a course first before adding textbooks")
+        else:
+            self.disable_lambda1 = True
+            self.disable_lambda2 = True
+            current_textbook_name = window.add_textbook_window(self, controller).show()
+            self.disable_lambda1 = False
+            self.disable_lambda2 = False
+            if(current_textbook_name in self.current_textbook_list):
+                messagebox.showwarning("WARNING", "You already have the identical textbook for this course")
+            elif(len(current_textbook_name) > 0):
+                self.course_textbooks.insert(self.textbook_nums, current_textbook_name)
+                self.current_textbook_list.append(current_textbook_name)
 
     def confirm_changes(self, controller):
-        pass
+        print(self.current_textbook_list)
+        print(self.cidx)
+        controller.server.set_course_r(self.teacher_courses[self.cidx], self.current_textbook_list)
 
     def search_teacher(self, controller):
         check = False
@@ -400,6 +439,8 @@ class TeacherAssignment(tk.Frame):
                         self.teacher_courses = controller.server.get_teacher_c(self.current_teacher)
                         print("TEACHER COURSES: ", self.teacher_courses)
                         self.display_teacher_info(controller)
+                        self.course_selected = False
+                        self.teacher_selected = True
                         break
                     else:
                         messagebox.showinfo("YOU ARE WHO YOU ARE", "NANI?!?")
@@ -446,6 +487,7 @@ class TeacherAssignment(tk.Frame):
         self.course_textbook_label.grid(row = 4, column = 5, sticky = "W")
         self.course_textbooks = tk.Listbox(self, bd = 0, bg = MAROON, font = controller.MENU_FONT, selectmode = "SINGLE", selectbackground = MAROON)
         self.course_textbooks.grid(row = 5, column = 5, pady = 5, sticky = "NW")
+        self.course_textbooks.bind('<<ListboxSelect>>', lambda event: self.select_textbook(event,controller))
         self.button_container = tk.Frame(self)
         self.button_container["bg"] = MAROON
         self.button_container.grid(row = 5, column = 6, rowspan = 3, pady = 5, sticky = "NW")
