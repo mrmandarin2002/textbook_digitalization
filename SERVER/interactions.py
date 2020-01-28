@@ -150,9 +150,9 @@ def course_numbers(args):
     return "|".join(numbers)
 
 def set_course_textbooks(args):
-    print(get_time()+"Setting textbooks:\n\t"+"\n\t".join(args[1])+"\nAs requisites to course: "+args[0])
+    print(get_time()+"Setting textbooks:\n\t"+"\n\t".join(args[1].split("~"))+"\nAs requisites to course: "+args[0])
     conn = Database.create_connection("server.db")
-    Database.set_course_requisites(conn, args[0], args[1])
+    Database.set_course_requisites(conn, args[0], args[1].replace("~", "|"))
     conn.close()
     return "1"
 
