@@ -1,7 +1,9 @@
-import socket
+import socket, threading
 from tkinter import messagebox
 
 class Client:
+
+    server_connection = True
 
     # initialization method
     def __init__(self, address, port):
@@ -13,6 +15,19 @@ class Client:
         self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.udp_socket.bind(("", 7357))
         self.udp_socket.settimeout(1)
+        self.check_connection()
+
+    def check_connection(self):
+        threading.Timer(5.0, self.check_connection).start()
+        if(not self.ping() and self.server_connection):
+            print("Connection with server is lost")
+            self.server_connection = False
+            messagebox.showerror("Connection Error", "Client has failed to establish a connection with the server, please connect before using the program")
+            self.server_connection = True
+        elif(self.server_connection):
+            print("Connection with server is present!")
+        else:
+            print("Currently no connection with the server")
 
     # method to close the udp socket
     def close(self):
@@ -25,7 +40,6 @@ class Client:
             data = self.udp_socket.recvfrom(4096)[0]
             return data.decode("utf-8") # return decoded data
         except: # if a timeout exception was thrown
-            messagebox.showerror("Connection Error", "Server is not connected")
             return "_"
 
     # command method

@@ -3,12 +3,9 @@ import tkinter as tk                # python 3
 from tkinter import font  as tkfont # python 3
 from tkinter import ttk
 from tkinter import messagebox
-import time
 
 #import own files
-import interactions, calculations, window
-from datetime import datetime
-from pynput.keyboard import Key, Listener
+import interactions, calculations, window, barcode_interaction
 
 MAIN_FONT = "Comic Sans MS"
 MAROON = '#B03060'
@@ -20,9 +17,6 @@ class client(tk.Tk):
     barcode_string = ""
     current_barcode = ""
     barcode_scanned = False
-    start = datetime.now()
-    previous_time = 0
-    scanner_status = True
     version = "teacher"
     student_info = []
     student_textbooks = []
@@ -47,9 +41,13 @@ class client(tk.Tk):
         self.BUTTON_FONT = tkfont.Font(family=MAIN_FONT, size=10)
         self.BACK_BUTTON_FONT = tkfont.Font(family = MAIN_FONT, size = 8)
         self.MENU_FONT = tkfont.Font(family=MAIN_FONT, size=11)
-        
-        keyLis = Listener(on_press=self.on_press)
-        keyLis.start()
+
+        self.scanner = barcode_interaction.scanner()
+
+
+        #listens for keypresses (calls "on_press" function)
+        #keyLis = Listener(on_press=self.on_press)
+        #keyLis.start()
 
         container = tk.Frame(self)
         container.pack(side = "top", fill = "both", expand = True)
@@ -67,26 +65,6 @@ class client(tk.Tk):
             frame.grid(row = 0, column = 0, sticky = "nswe")
 
         self.show_frame("Menu")
-
-    ##for barcode input
-    def on_press(self, key):
-        if(self.scanner_status):
-            total_elapsed = (datetime.now() - self.start).microseconds + (datetime.now() - self.start).seconds * 1000000
-            if(total_elapsed - self.previous_time < 40000):
-                if(key != Key.enter and key != Key.shift):
-                    self.barcode_string += str(key)[1:-1]
-                if(key == Key.enter and len(self.barcode_string) > 4):
-                    self.current_barcode = self.barcode_string
-                    self.barcode_string = ""
-                    self.last_barcode_string = self.current_barcode
-                    self.check_barcode()
-                    exec(self.current_frame_name + ".barcode_scanned(self = self.current_frame, controller=self)")
-            else:
-                self.barcode_string = str(key)[1:-1]
-                if(key == Key.shift or key == Key.enter):
-                    self.barcode_string = ""
-            self.previous_time = total_elapsed  
-            #print(self.barcode_string)
 
     def check_barcode(self):
         if(self.server.ping()):
@@ -118,7 +96,6 @@ class client(tk.Tk):
     def show_frame(self, page_name):
         exec(page_name + ".can_enter(self = self.frames[page_name], controller = self)")
         if(self.check_requisites):
-            self.scanner_status = True
             self.current_frame = self.frames[page_name]
             self.current_frame_name = page_name
             exec(self.current_frame_name + ".clear(self = self.current_frame)")
@@ -140,9 +117,9 @@ class WelcomePage(tk.Frame):
         pass
 
     def barcode_scanned(self, controller):
-        controller.scanner_status = False
+        pass
 
-    def can_enter(self):
+    def can_enter(self, controller):
         controller.check_requisites = True
     
     def __init__(self, parent, controller):
@@ -164,7 +141,7 @@ class Menu(tk.Frame):
         pass
     
     def barcode_scanned(self, controller):
-        controller.scanner_status = False
+        pass
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -770,12 +747,13 @@ class Info(tk.Frame):
         back_button = controller.make_back_button(controller = self)
         back_button.grid(row = 11, column = 0, padx = 10, pady = (132 - pady_dif_back,0), sticky = "W")
 
-if __name__ =='__main__':
-    root = client()
-    root.title("DigiText")
-    root.iconbitmap("sphs_icon.ico")
-    root.geometry("600x500")
-    root.mainloop()
+
+
+root = client()
+root.title("DigiText")
+root.iconbitmap("sphs_icon.ico")
+root.geometry("600x500")
+root.mainloop()
 
         
 
