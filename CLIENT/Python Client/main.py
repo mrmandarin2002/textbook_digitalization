@@ -31,7 +31,8 @@ class client(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
 
-        self.server = interactions.Client(address = "127.0.0.1", port = 7356)
+        
+        #self.server = interactions.Client(address = "127.0.0.1", port = 7356)
         self.scene_list = (WelcomePage, Menu, TextbookManagement, Info, TextbookScanner, TeacherAssignment)
 
         #different type of fonts used throughout the program
@@ -54,7 +55,7 @@ class client(tk.Tk):
         container.grid_rowconfigure(0, weight = 1)
         container.grid_columnconfigure(0, weight = 1)
 
-        self.textbook_list = self.server.get_textbook_titles()
+        self.textbook_list = self.scanner.server.get_textbook_titles()
 
         self.frames = {}
 
@@ -65,7 +66,7 @@ class client(tk.Tk):
             frame.grid(row = 0, column = 0, sticky = "nswe")
 
         self.show_frame("Menu")
-
+    """
     def check_barcode(self):
         if(self.server.ping()):
             if(self.server.valid_s(self.current_barcode)):
@@ -92,6 +93,7 @@ class client(tk.Tk):
                 self.barcode_status = "Textbook"
             else:
                 self.barcode_status = "Unknown"      
+    """
 
     def show_frame(self, page_name):
         exec(page_name + ".can_enter(self = self.frames[page_name], controller = self)")
@@ -163,7 +165,6 @@ class TextbookManagement(tk.Frame):
 
     student_scanned = False
     day = 'D'
-    current_student_barcode = ""
     textbook_list_made = False
 
     def can_enter(self, controller):
@@ -181,17 +182,16 @@ class TextbookManagement(tk.Frame):
  
     def barcode_scanned(self, controller):
         if(controller.server.ping()):
-            if(controller.server.valid_s(controller.current_barcode)):
+            if(controller.barcode_status == "Student"):
                 self.student_scanned = True
                 self.clear()
-                self.student_info = controller.server.info_s(controller.current_barcode)
-                self.student_textbooks = controller.server.student_t(controller.current_barcode)
-                self.student_name_label["text"] = "Student Name: " + self.student_info[2]
+                self.student_name_label["text"] = "Student Name: " + controller.student_info[2]
                 self.barcode_status_label.config(text = "Barcode Type: Student")
-                self.num_of_textbooks = len(self.student_textbooks)
-                print(self.student_textbooks)
-                self.student_tnum_label["text"] = "Textbooks taken out: " + str(self.num_of_textbooks)
+                self.num_of_textbooks = len(controller.student_textbooks)
+                print(controller.student_textbooks)
+                self.student_tnum_label["text"] = "Textbooks taken out: " + str(len(controller.student_textbooks))
                 self.textbook_list.delete(0, tk.END)
+                self.current_student_barcode = controller.current_barcode
                 if(self.day == 'D'):
                     print(controller.student_info)
                     cnt = 0
@@ -201,14 +201,12 @@ class TextbookManagement(tk.Frame):
                 else:
                     if(self.num_of_textbooks):
                         self.textbook_list_made = True
-                        self.student_textbooks = controller.server.student_t(self.current_student_barcode)
                         cnt = 0
-                        for textbook in self.student_textbooks:
-                            textbook_info = controller.server.info_t(textbook)
-                            self.textbook_list.insert(cnt, textbook_info[1])
+                        for textbook in controller.student_textbooks:
+                            self.textbook_list.insert(cnt, controller.server.info_t(textbook)[1])
                             cnt += 1
                     else:
-                        messagebox.showerror("ERROR", self.student_info[2] + " has taken out no textbooks")
+                        messagebox.showerror("ERROR", controller.student_info[2] + " has taken out no textbooks")
 
             elif(controller.server.valid_t(controller.current_barcode)):
                 self.barcode_status_label["text"] = "Barcode Type: Textbook"
@@ -253,19 +251,18 @@ class TextbookManagement(tk.Frame):
                         if(controller.textbook_info[4] == self.current_student_barcode):
                             self.num_of_textbooks -= 1
                             self.student_tnum_label["text"] = "Textbooks taken out: " + str(self.num_of_textbooks)
-                            self.textbook_list.delete(self.student_textbooks.index(controller.current_barcode))
-                            self.student_textbooks.remove(controller.current_barcode)
+                            self.textbook_list.delete(controller.student_textbooks.index(controller.current_barcode))
+                            controller.student_textbooks.remove(controller.current_barcode)
                             controller.server.return_t(controller.current_barcode)
                             ###
                             #price
                             #waiting for functions to be complete
                             ###
                             if(not self.num_of_textbooks):
-                                messagebox.showwarning("Done!", self.student_info[2] + " is done returning textbooks!")
+                                messagebox.showwarning("Done!", controller.student_info[2] + " is done returning textbooks!")
                         elif(controller.textbook_info[4] != "None"):
                             print(controller.textbook_info)
-                            student_name = (controller.server.info_s(controller.textbook_info[4]))[2]
-                            messagebox.showerror("ERROR", "You are trying to return a textbook that belongs to " + student_name)
+                            messagebox.showerror("ERROR", "You are trying to return a textbook that belongs to " + (controller.server.info_s(controller.textbook_info[4]))[2])
                         else:
                             messagebox.showerror("ERROR", "This textbook actually belongs to nobody")
                 else:
@@ -483,8 +480,8 @@ class TeacherAssignment(tk.Frame):
         self.controller = controller
         TeacherAssignment.configure(self, background = MAROON)
 
-        self.courses = controller.server.courses_n()
-        self.teachers = controller.server.get_teachers()
+        self.courses = controller.scanner.server.courses_n()
+        self.teachers = controller.scanner.server.get_teachers()
         controller.make_back_button(self).grid(row = 8, column = 0, padx = 10, pady = (15,0))
         self.first_name_entry = tk.Entry(self)
         self.last_name_entry = tk.Entry(self)
