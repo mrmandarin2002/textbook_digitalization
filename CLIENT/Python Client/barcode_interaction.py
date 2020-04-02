@@ -23,7 +23,7 @@ class scanner:
 
     def __init__(self):
 
-        #self.server = interactions.Client(address = "127.0.0.1", port = 7356)
+        self.server = interactions.Client(address = "127.0.0.1", port = 7356)
         keyLis = Listener(on_press=self.on_press)
         keyLis.start()
         
