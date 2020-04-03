@@ -4,7 +4,7 @@ from tkinter import font as tkfont
 from tkinter import messagebox
 import sys
 
-import interactions, main
+import interactions, font_info
 
 
 class add_student_window(object):
@@ -36,14 +36,14 @@ class add_student_window(object):
     def __init__(self, master, controller):
 
         popup = self.popup = Toplevel(master)
-        popup.configure(background = main.MAROON)
+        popup.configure(background = font_info.MAROON)
         popup.title("Add Student")
         popup.iconbitmap("sphs_icon.ico")
-        student_name_label = Label(popup, text = "Student Name: ", bg = main.MAROON, font = controller.MENU_FONT)
+        student_name_label = Label(popup, text = "Student Name: ", bg = font_info.MAROON, font = controller.MENU_FONT)
         student_name_label.grid(row = 0, column = 0, padx = (10,0), pady = 5, sticky = "W")
-        student_id_label = Label(popup, text = "Student ID: ", bg = main.MAROON, font = controller.MENU_FONT)
+        student_id_label = Label(popup, text = "Student ID: ", bg = font_info.MAROON, font = controller.MENU_FONT)
         student_id_label.grid(row = 1, column = 0, padx = (10,0), pady = 5, sticky = "W")
-        student_deposit_label = Label(popup, text = "Student Deposit: ", bg = main.MAROON, font = controller.MENU_FONT)
+        student_deposit_label = Label(popup, text = "Student Deposit: ", bg = font_info.MAROON, font = controller.MENU_FONT)
         student_deposit_label.grid(row = 2, column = 0, padx = (10,0), pady = 5, sticky = "W")
         exit_button = Button(popup, text = "Confirm Values", font = controller.MENU_FONT, command = lambda : self.add_student(controller))
         exit_button.grid(row = 3, column = 0, padx = 10, pady = 10)
@@ -84,19 +84,19 @@ class add_textbook_window(tk.Toplevel):
 
     def __init__(self, parent, controller):
         tk.Toplevel.__init__(self, parent)
-        self.configure(background = main.MAROON)
+        self.configure(background = font_info.MAROON)
         self.title("Add Textbook")
         self.iconbitmap("sphs_icon.ico")
         self.textbook_name = tk.StringVar()
-        title_label = tk.Label(self, text = "Enter the name of the textbook:", font = controller.MENU_FONT, bg = main.MAROON)
+        title_label = tk.Label(self, text = "Enter the name of the textbook:", font = controller.MENU_FONT, bg = font_info.MAROON)
         title_label.grid(row = 0, column = 0,padx = 5, pady = 5)
         self.textbook_entry = tk.Entry(self)
         self.textbook_entry.grid(row = 1, column = 0, padx = 5, pady = 5)
         textbook_button = tk.Button(self, text = "Search textbook", font = controller.BUTTON_FONT, command = lambda : self.search_textbook(controller))
         textbook_button.grid(row = 2, column = 0, padx = 5, pady = 5)
-        pot_textbook_label = tk.Label(self, text = "Potential Textbooks:", font = controller.MENU_FONT, bg = main.MAROON)
+        pot_textbook_label = tk.Label(self, text = "Potential Textbooks:", font = controller.MENU_FONT, bg = font_info.MAROON)
         pot_textbook_label.grid(row = 3, column = 0, padx = 5, pady = (10, 0))
-        self.textbook_list = tk.Listbox(self, bd = 0, bg = main.MAROON, font = controller.MENU_FONT, selectmode = "SINGLE", selectbackground = main.MAROON)
+        self.textbook_list = tk.Listbox(self, bd = 0, bg = font_info.MAROON, font = controller.MENU_FONT, selectmode = "SINGLE", selectbackground = font_info.MAROON)
         self.textbook_list.grid(row = 4, column = 0, padx = 5, pady = (0, 10))
         self.textbook_list.bind('<<ListboxSelect>>', lambda event: self.select_textbook(event,controller))
         confirm_button = tk.Button(self, text = "Add Textbook", font = controller.BUTTON_FONT, command = self.death)
