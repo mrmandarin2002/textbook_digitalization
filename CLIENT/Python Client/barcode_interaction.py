@@ -45,6 +45,8 @@ class scanner:
     # ----
     # }
     textbook_info = []
+    #list of all textbooks
+    textbook_list = []
 
     def __init__(self, controller):
 
@@ -54,6 +56,8 @@ class scanner:
         self.courses = self.server.courses_n()
         #all the teachers at the school
         self.teachers = self.server.get_teachers()
+        #all the textboosk at school
+        self.textbook_list = self.server.get_textbook_titles()
 
         #starts the thread where program listens for input (if there is input call on_press function below)
         keyLis = Listener(on_press=lambda key : self.on_press(key, controller))
@@ -133,3 +137,7 @@ class scanner:
         else:
             print("UNKNOWN BARCODE!")
             self.barcode_status = "Unknown"     
+    
+    #updates the textbook_list to include the latest books
+    def update_textbook_list(self, controller):
+        self.textbook_list = controller.server.get_textbook_titles()

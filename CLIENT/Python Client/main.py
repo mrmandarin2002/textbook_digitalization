@@ -10,21 +10,10 @@ import interactions, calculations, window, barcode_interaction
 MAIN_FONT = "Comic Sans MS"
 MAROON = '#B03060'
 PINK = '#FF00D4'
-NEON_GREEN = '#4DFF4D'
 
 class client(tk.Tk):
 
-    barcode_string = ""
-    current_barcode = ""
-    barcode_scanned = False
     version = "teacher"
-    student_info = []
-    student_textbooks = []
-    student_needed_textbooks = []
-    student_courses = []
-    student_textbooks_title = []
-    textbook_info = []
-    barcode_status = ""
     textbook_list = []
 
 
@@ -32,7 +21,7 @@ class client(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
 
         
-        #self.server = interactions.Client(address = "127.0.0.1", port = 7356)
+        
         self.scene_list = (WelcomePage, Menu, TextbookManagement, Info, TextbookScanner, TeacherAssignment)
 
         #different type of fonts used throughout the program
@@ -45,16 +34,10 @@ class client(tk.Tk):
 
         self.scanner = barcode_interaction.scanner(self)
 
-        #listens for keypresses (calls "on_press" function)
-        #keyLis = Listener(on_press=self.on_press)
-        #keyLis.start()
-
         container = tk.Frame(self)
         container.pack(side = "top", fill = "both", expand = True)
         container.grid_rowconfigure(0, weight = 1)
         container.grid_columnconfigure(0, weight = 1)
-
-        self.textbook_list = self.scanner.server.get_textbook_titles()
 
         self.frames = {}
 
@@ -67,7 +50,7 @@ class client(tk.Tk):
         self.show_frame("Menu")
 
     def call_barcode_function(self, controller):
-        exec(root.current_frame_name + ".barcode_scanned(self = self.current_frame, controller=controller)")
+        exec(root.current_frame_name + ".barcode_scanned(self = self.current_frame, controller=self.scanner)")
 
     def show_frame(self, page_name):
         self.current_frame = self.frames[page_name]
@@ -493,17 +476,19 @@ class TextbookScanner(tk.Frame):
         pass
 
     def barcode_scanned(self, controller):
+        self.barcode_label["text"] = "Current Barcode :" + controller.current_barcode
         if(self.values_set):
             if(controller.barcode_status == "Textbook"):
                 if(controller.textbook_info[1] == self.current_title and float(controller.textbook_info[2]) == self.current_price):
                     messagebox.showerror("Error", "This textbook has the same values as the set values")                        
                 else: 
                     MsgOption = messagebox.askyesno("Textbook already in database!", "Would you like to replace the original values?")
-                    if(MsgOption == "yes"):
+                    if(MsgOption):
                         self.num_scanned += 1
                         self.textbook_label.config(text = "Number of textbooks scanned: " + str(self.num_scanned))
                         controller.server.delete_t(controller.current_barcode)
                         controller.server.add_t(controller.current_barcode, self.current_title, str(self.current_price), str(self.current_condition))
+                        controller.update_textbook_list()
             elif(controller.barcode_status == "Student"):
                 messagebox.showwarning("Warning!", "You are scanning in a student's barcode ID!")
             else:
@@ -511,9 +496,8 @@ class TextbookScanner(tk.Frame):
                 self.barcode_label.config(text = "Current Barcode: " + controller.current_barcode)
                 self.textbook_label.config(text = "Number of textbooks scanned: " + str(self.num_scanned))
                 self.current_condition = calculations.get_textbook_condition(self.condition_entry.get())
-                self.current_title = self.title_entry.get()
-                print("TITLE: " + self.current_title)
                 controller.server.add_t(controller.current_barcode, self.current_title, str(self.current_price), str(self.current_condition))
+                controller.update_textbook_list()
         else:
             messagebox.showerror("Error", "Please set the values before scanning in a barcode")
 
@@ -531,6 +515,7 @@ class TextbookScanner(tk.Frame):
                 similar_list = calculations.check_similarity(self.title_entry.get(), controller.textbook_list)
                 print(similar_list)
                 self.current_price = float(price_string)
+                self.current_title = self.title_entry.get()
                 self.set_button.config(text = "RESET")
                 self.textbook_label.config(text = "Number of textbooks scanned: " + str(self.num_scanned))
                 self.title_entry.config(state = "disabled")

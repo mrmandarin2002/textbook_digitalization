@@ -67,7 +67,7 @@ class add_textbook_window(tk.Toplevel):
         self.textbook_list.delete(0, tk.END)
         cnt = 0 
         print(textbook_words)
-        for textbook in controller.textbook_list:
+        for textbook in controller.scanner.textbook_list:
             print("TEXTBOOK:", textbook)
             check = True
             for keyword in textbook_words:
