@@ -7,21 +7,23 @@ from tkinter import messagebox
 #import own files
 import interactions, calculations, window, barcode_interaction
 
+#some variables for fonts
 MAIN_FONT = "Comic Sans MS"
 MAROON = '#B03060'
 PINK = '#FF00D4'
 
+#the center of the universe (digitext really)
 class client(tk.Tk):
 
+    #there will likely be a few versions of this program (students will have a restricted version)
     version = "teacher"
-    textbook_list = []
 
-
+    #some initialization stuff I found on the internet. Don't know how but it works!
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
-
         
-        
+        #this is the list of different windows ("frames as called in tkinter"). The basic idea between page switches...
+        #is that I already pre-load all the windows and switch between them as necessary
         self.scene_list = (WelcomePage, Menu, TextbookManagement, Info, TextbookScanner, TeacherAssignment)
 
         #different type of fonts used throughout the program
@@ -32,26 +34,34 @@ class client(tk.Tk):
         self.BACK_BUTTON_FONT = tkfont.Font(family = MAIN_FONT, size = 8)
         self.MENU_FONT = tkfont.Font(family=MAIN_FONT, size=11)
 
+        #self.scanner allows for barcode input and server communication
+        #the relevant code is in barcode_interactions.py
         self.scanner = barcode_interaction.scanner(self)
 
+        #some other lines of code that the stack overflow provided
         container = tk.Frame(self)
         container.pack(side = "top", fill = "both", expand = True)
         container.grid_rowconfigure(0, weight = 1)
         container.grid_columnconfigure(0, weight = 1)
 
+        #where I keep all my windows and switch between them
         self.frames = {}
 
+        #initializes all the windows / pages
         for scene in self.scene_list:
             page_name = scene.__name__
             frame = scene(parent=container, controller = self)
             self.frames[page_name] = frame
             frame.grid(row = 0, column = 0, sticky = "nswe")
 
+        #this is the starting window
         self.show_frame("Menu")
 
+    #this function is called from barcode_interaction and allows for code to be run in a specific window whenever a barcode is scanned
     def call_barcode_function(self, controller):
         exec(root.current_frame_name + ".barcode_scanned(self = self.current_frame, controller=self.scanner)")
 
+    #this shows the frame / window of the page we want to display
     def show_frame(self, page_name):
         self.current_frame = self.frames[page_name]
         self.current_frame_name = page_name
@@ -68,6 +78,13 @@ class client(tk.Tk):
     def make_back_button(self, controller):
         return tk.Button(controller, text = "Back to Menu", command = lambda: self.show_frame("Menu"), font = self.BACK_BUTTON_FONT)
 
+#############################################################################################
+#the next classes are the code for each individual frame                                    #
+#note that all classes have clear and barcode_scanned functions but some are empty          #
+#this is because sometimes we want nothing to happen if a barcode is scanned i.e in the menu#
+#############################################################################################
+
+#welcome screen, no need to explain
 class WelcomePage(tk.Frame):
 
     def clear(self, controller):
@@ -88,7 +105,8 @@ class WelcomePage(tk.Frame):
         welcome_title.pack(side = "top", pady = 150, padx = 50)
         welcome_button = controller.make_button(controller = self, d_text = "Press to continue...", scene = "Menu", option = '')
         welcome_button.pack()
-        
+
+#menu, basically a window where you can go into the more important frames   
 class Menu(tk.Frame):
 
     def clear(self):
@@ -677,7 +695,6 @@ class Info(tk.Frame):
             self.add_s.grid(row = 10, column = 0, padx = 10, pady = (10,0), sticky = "W")
         back_button = controller.make_back_button(controller = self)
         back_button.grid(row = 11, column = 0, padx = 10, pady = (132 - pady_dif_back,0), sticky = "W")
-
 
 
 root = client()
