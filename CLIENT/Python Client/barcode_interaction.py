@@ -1,6 +1,6 @@
 import time
 #own files
-import main, interactions
+import interactions
 #allow to keep track of time
 from datetime import datetime
 #pynput's library for enabling threading
@@ -45,19 +45,29 @@ class scanner:
     # ----
     # }
     textbook_info = []
+    #list of all textbooks
+    textbook_list = []
 
-    def __init__(self):
+    def __init__(self, controller):
 
         #where the interaction with server happens
         self.server = interactions.Client(address = "127.0.0.1", port = 7356)
+        #all the courses available
+        self.courses = self.server.courses_n()
+        #all the teachers at the school
+        self.teachers = self.server.get_teachers()
+        #all the textboosk at school
+        self.textbook_list = self.server.get_textbook_titles()
+        #sort the textbook_list alphabetically
+        self.textbook_list = sorted(self.textbook_list)
 
         #starts the thread where program listens for input (if there is input call on_press function below)
-        keyLis = Listener(on_press=self.on_press)
+        keyLis = Listener(on_press=lambda key : self.on_press(key, controller))
         keyLis.start()
         
     #function that is called whenever there is input from a device
     #note that time is in microseconds
-    def on_press(self, key):
+    def on_press(self, key, controller):
         #the amount of time between current input and previous input (converted into micro seconds)
         time_elapsed = (datetime.now() - self.start).microseconds + (datetime.now() - self.start).seconds * 1000000
         #this assumes that the input is from barcode scanner as the time between inputs is less than 40 milliseconds
@@ -76,7 +86,7 @@ class scanner:
                 #checks what the actual hell the barcode is
                 self.check_barcode()
                 #executes a function in each frame respectively that will process the barcode
-                exec("main." + main.root.current_frame_name + ".barcode_scanned(self = main.root.current_frame, controller=main.root.scanner)")
+                controller.call_barcode_function(self)
         else:
             #in case this is the start of a scanner's input, we add the first ccharacter
             self.barcode_string = str(key)[1:-1]
@@ -94,7 +104,7 @@ class scanner:
             self.student_info = self.server.info_s(self.current_barcode)
             #for debugging I guess
             print("STUDENT BARCODE!")
-            print("Student Info: " + self.student_info)
+            print(self.student_info)
             #gets the textbooks the student has taken out
             self.student_textbooks = self.server.student_t(self.current_barcode)
             #clears a bunch of lists so that the relevant stuff can be added
@@ -129,3 +139,7 @@ class scanner:
         else:
             print("UNKNOWN BARCODE!")
             self.barcode_status = "Unknown"     
+    
+    #updates the textbook_list to include the latest books
+    def update_textbook_list(self, controller):
+        self.textbook_list = controller.server.get_textbook_titles()
