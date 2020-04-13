@@ -111,8 +111,8 @@ class Client:
         return self.command("assign_t", [textbook_id, student_id])
 
     # retun textbook from student in database
-    def return_t(self, textbook_id):
-        return self.command("return_t", [textbook_id])
+    def return_t(self, textbook_id, textbook_condition):
+        return self.command("return_t", [textbook_id, textbook_condition])
 
     # get a list of all course numbers
     def courses_n(self):

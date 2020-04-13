@@ -119,6 +119,19 @@ def assign_textbook(conn, TextbookNumber, StudentNumber):
         # commit the changed database
         conn.commit()
 
+def return_textbook(conn, number, condition):
+    # create an sql command string
+    sql_cmd = """INSERT INTO ReturnedTextbooks(TextbookNumber, Condition)
+                 VALUES (?,?)"""
+    # create a cursor object
+    cur = conn.cursor()
+    # execute the sql command string using the function parameters
+    cur.execute(sql_cmd, (number, condition))
+    # commit the changes to the database
+    conn.commit()
+    # return true to indicate that the operation has been successfuly applied
+    cur.close()
+
 def insert_course(conn, CourseNumber, CourseName, CourseTeacher):
     # create an sql command string
     sql_cmd = """INSERT INTO Courses(CourseNumber, CourseName, CourseTeacher, CourseTextbooks)

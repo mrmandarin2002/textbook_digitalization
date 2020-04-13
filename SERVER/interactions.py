@@ -113,9 +113,10 @@ def assign_textbook(args): # textbook number, student number
 
 # return a textbook from a student in the database
 def return_textbook(args):
-    print(get_time()+"Returning textbook: "+args[0]+" from student...")
+    print(get_time()+"Returning textbook: "+args[0]+" with condition: "+args[1]+" from student...")
     conn = Database.create_connection("server.db")
     Database.assign_textbook(conn, args[0], "None")
+    Database.return_textbook(conn, args[0], args[1])
     conn.close()
     return "1"
 
